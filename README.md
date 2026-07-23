@@ -1,123 +1,56 @@
 # Frontier
 
-`frontier` is a portable agent skill for finding and synthesizing recent frontier-AI technological advancements.
+A portable agent skill for discovering and understanding recent frontier-AI advances.
 
-For a topic, it searches four technical lanes:
+Frontier searches:
 
-- **Research papers:** OpenAlex, arXiv, and Semantic Scholar
-- **Hugging Face:** relevant newly created models and their model-card records
-- **GitHub:** relevant newly created repositories
-- **Official technical publications:** research and engineering posts from the approved company registry
+- Research papers
+- Official technical publications
+- Hugging Face models and model cards
+- Relevant GitHub repositories
 
-The host agent consolidates related records into one advancement report. It does not track general AI news, social trends, or every package/repository release.
+It combines related findings into a structured, evidence-grounded report.
 
-## Requirements
-
-- Python 3.12 or newer
-- No third-party Python packages
-
-## Supported runtimes
+## Supported agents
 
 - Claude Code: `/frontier`
 - Codex: `$frontier`
-- OpenCode: native skill activation or implicit matching
+- OpenCode: native skill activation
 
 ## Install
-
-Directly from GitHub with curl:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh | sh
 ```
 
-Pass installer options after `--`:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh \
-  | sh -s -- --agent codex --force
-```
-
-The bootstrap requires `curl`, `tar`, and `python3.12`. It downloads a temporary GitHub archive, runs the standard installer, and removes the temporary files.
-
-Override the repository or ref when testing a fork or tag:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh \
-  | FRONTIER_REPOSITORY=owner/repository FRONTIER_REF=main sh
-```
-
-From a local checkout:
-
-```bash
-python3.12 scripts/install.py --agent all
-```
-
-Preview installation:
-
-```bash
-python3.12 scripts/install.py --agent all --dry-run
-```
-
-Replace an existing copy explicitly:
-
-```bash
-python3.12 scripts/install.py --agent all --force
-```
-
-## Search utility
-
-The bundled utility searches papers, Hugging Face models, and GitHub repositories concurrently:
-
-```bash
-python3.12 skills/frontier/scripts/search.py \
-  --query "long-horizon LLM agents" \
-  --query "agent memory and tool use" \
-  --since 2025-12-01 \
-  --until 2026-03-01 \
-  --candidate-limit 30 \
-  --artifact-limit 20 \
-  --output /tmp/frontier-results.json
-```
-
-Optional environment variables:
-
-- `SEMANTIC_SCHOLAR_API_KEY` for higher Semantic Scholar reliability
-- `OPENALEX_EMAIL` for the OpenAlex polite pool
-- `GITHUB_TOKEN` for higher GitHub API reliability
-- `FRONTIER_USER_AGENT` to identify the client
-
-No credentials are required for the default workflow.
-
-Official company publications are searched by the host agent with site-restricted web search. See [`company-sources.md`](skills/frontier/references/company-sources.md).
+The installer requires `curl`, `tar`, and Python 3.12 or newer.
 
 ## Search behavior
 
-1. Query variants are sent to all configured paper and artifact adapters concurrently.
-2. Results outside the requested date window are removed.
-3. Paper and artifact records are normalized separately.
-4. Paper duplicates merge by DOI, arXiv ID, Semantic Scholar ID, or conservative title/author/year matching.
-5. Model duplicates merge by Hugging Face model identifier; repository duplicates merge by GitHub full name.
-6. Papers and artifacts are ranked with provider-independent reciprocal-rank fusion.
-7. Authority is preserved separately from relevance. Stars, downloads, and likes are context only.
-8. The host agent searches approved company technical domains in parallel and groups related papers, posts, models, and repositories into unified advancements.
-9. The parent agent performs the final claim, citation, and evidence audit.
+For each topic, Frontier searches papers, official technical publications, Hugging Face, and GitHub in parallel. It then:
 
-The default paper evidence boundary is abstract-level. Model cards, repository READMEs, and company pages must be inspected before making detailed technical claims.
+- Filters results by the requested date range
+- Removes duplicates and groups related findings
+- Ranks results by relevance, evidence, and authority
+- Produces one structured report with sources and uncertainties
 
-## Official organizations
+Popularity signals such as stars, downloads, and likes are not treated as technical evidence.
 
-Anthropic, OpenAI, Google DeepMind, Meta, Microsoft, NVIDIA, Kimi/Moonshot AI, Qwen, GLM/Z.ai, and DeepSeek.
+## Search utility
 
-## Development checks
+The bundled utility performs deterministic paper, model, and repository discovery:
 
 ```bash
-python3.12 -m compileall skills/frontier/scripts scripts
-python3.12 -m unittest discover -s tests -v
-python3.12 skills/frontier/scripts/search.py --help
+python3.12 <skill-directory>/scripts/search.py \
+  --query "long-horizon LLM agents" \
+  --output /tmp/frontier-results.json
 ```
 
-## Scope
+Use `--help` for additional search and output options.
 
-Included: OpenAlex, arXiv, Semantic Scholar, Hugging Face model discovery, GitHub repository discovery, approved company technical publications, standard-library Python, structured JSON, portable `SKILL.md`, and installer.
+Optional environment variables:
 
-Deferred: general news, social sources, package-release monitoring, Crossref, PDF extraction, persistent caching, database storage, hosted services, and direct LLM API integration.
+- `SEMANTIC_SCHOLAR_API_KEY` — improve Semantic Scholar access
+- `OPENALEX_EMAIL` — use the OpenAlex polite pool
+- `GITHUB_TOKEN` — improve GitHub API rate limits
+- `FRONTIER_USER_AGENT` — customize the request user agent
