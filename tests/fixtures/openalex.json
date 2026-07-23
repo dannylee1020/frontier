@@ -1,0 +1,39 @@
+{
+  "results": [
+    {
+      "id": "https://openalex.org/W1",
+      "doi": "https://doi.org/10.1234/example.1",
+      "title": "A Study of Frontier Models",
+      "publication_date": "2026-02-10",
+      "type": "journal-article",
+      "is_retracted": false,
+      "relevance_score": 12.5,
+      "authorships": [
+        {"author": {"display_name": "Ada Lovelace"}},
+        {"author": {"display_name": "Grace Hopper"}}
+      ],
+      "abstract_inverted_index": {
+        "We": [0],
+        "evaluate": [1],
+        "frontier": [2],
+        "models": [3]
+      },
+      "ids": {"doi": "https://doi.org/10.1234/example.1"},
+      "primary_location": {
+        "landing_page_url": "https://example.org/paper/1",
+        "pdf_url": "https://example.org/paper/1.pdf",
+        "source": {"display_name": "Example Journal"}
+      },
+      "open_access": {"is_oa": true}
+    },
+    {
+      "id": "https://openalex.org/W2",
+      "title": "An Older Study",
+      "publication_date": "2024-01-01",
+      "type": "journal-article",
+      "is_retracted": false,
+      "authorships": [],
+      "primary_location": {"source": {"display_name": "Old Journal"}}
+    }
+  ]
+}

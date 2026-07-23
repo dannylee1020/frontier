@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <title>arXiv Query Results</title>
+  <entry>
+    <id>http://arxiv.org/abs/2602.00001v2</id>
+    <updated>2026-02-12T10:00:00Z</updated>
+    <published>2026-02-10T10:00:00Z</published>
+    <title>A Study of Frontier Models</title>
+    <summary>We evaluate frontier models.</summary>
+    <author><name>Ada Lovelace</name></author>
+    <category term="cs.AI" />
+    <link href="http://arxiv.org/abs/2602.00001v2" />
+    <arxiv:doi>10.1234/example.1</arxiv:doi>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2602.00002</id>
+    <updated>2026-02-15T10:00:00Z</updated>
+    <published>2026-02-15T10:00:00Z</published>
+    <title>Another Frontier Result</title>
+    <summary>A second result.</summary>
+    <author><name>Alan Turing</name></author>
+    <category term="cs.LG" />
+    <link href="http://arxiv.org/abs/2602.00002" />
+  </entry>
+</feed>
