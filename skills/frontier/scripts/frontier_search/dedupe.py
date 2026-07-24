@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
-from .models import Paper, SourceRecord, merge_unique
+from .models import Paper, SourceRecord, merge_unique, source_role
 from .normalize import (
     clean_text,
     evidence_level_for,
@@ -43,6 +43,9 @@ def _identifier_keys(record: SourceRecord | Paper) -> list[str]:
 
 def paper_from_record(record: SourceRecord) -> Paper:
     abstract = clean_text(record.abstract)
+    role = source_role(record.source)
+    scholarly_sources = [record.source] if role == "scholarly" else []
+    momentum_sources = [record.source] if role == "momentum" else []
     paper = Paper(
         title=clean_text(record.title) or "Untitled paper",
         authors=[clean_text(author) or "" for author in record.authors if clean_text(author)],
@@ -56,8 +59,11 @@ def paper_from_record(record: SourceRecord) -> Paper:
         publication_status=record.publication_status or "unknown",
         urls=list(record.urls),
         sources=[record.source],
+        scholarly_sources=scholarly_sources,
+        momentum_sources=momentum_sources,
         matched_queries=[record.query],
-        source_ranks={record.source: [record.source_rank]},
+        source_ranks={record.source: [record.source_rank]} if role == "scholarly" else {},
+        momentum_ranks={record.source: [record.source_rank]} if role == "momentum" else {},
         source_scores=(
             {record.source: [record.source_score]}
             if record.source_score is not None
@@ -66,10 +72,12 @@ def paper_from_record(record: SourceRecord) -> Paper:
         source_identifiers={
             record.source: [key.split(":", 1)[1] for key in _identifier_keys(record)]
         },
+        metadata=dict(record.metadata),
         evidence_level=evidence_level_for(abstract),
         title_key=normalize_title(record.title),
     )
     paper.source_count = 1
+    paper.scholarly_source_count = len(scholarly_sources)
     return paper
 
 
@@ -131,8 +139,18 @@ def _merge_record(paper: Paper, record: SourceRecord) -> None:
     merge_unique(paper.urls, record.urls)
     merge_unique(paper.sources, [record.source])
     merge_unique(paper.matched_queries, [record.query])
-    paper.source_ranks.setdefault(record.source, []).append(record.source_rank)
-    paper.source_ranks[record.source] = sorted(set(paper.source_ranks[record.source]))
+
+    role = source_role(record.source)
+    if role == "momentum":
+        merge_unique(paper.momentum_sources, [record.source])
+        paper.momentum_ranks.setdefault(record.source, []).append(record.source_rank)
+        paper.momentum_ranks[record.source] = sorted(
+            set(paper.momentum_ranks[record.source])
+        )
+    else:
+        merge_unique(paper.scholarly_sources, [record.source])
+        paper.source_ranks.setdefault(record.source, []).append(record.source_rank)
+        paper.source_ranks[record.source] = sorted(set(paper.source_ranks[record.source]))
     if record.source_score is not None:
         paper.source_scores.setdefault(record.source, []).append(record.source_score)
     paper.source_identifiers.setdefault(record.source, [])
@@ -140,8 +158,12 @@ def _merge_record(paper: Paper, record: SourceRecord) -> None:
         value = key.split(":", 1)[1]
         if value not in paper.source_identifiers[record.source]:
             paper.source_identifiers[record.source].append(value)
+    for key, value in record.metadata.items():
+        if value not in (None, "", [], {}):
+            paper.metadata.setdefault(key, value)
     paper.evidence_level = evidence_level_for(paper.abstract)
     paper.source_count = len(paper.sources)
+    paper.scholarly_source_count = len(paper.scholarly_sources)
 
 
 def deduplicate(records: Iterable[SourceRecord]) -> list[Paper]:
@@ -176,4 +198,5 @@ def deduplicate(records: Iterable[SourceRecord]) -> list[Paper]:
 
     for paper in papers:
         paper.source_count = len(paper.sources)
+        paper.scholarly_source_count = len(paper.scholarly_sources)
     return papers

@@ -18,6 +18,7 @@ from ..transport import request_json
 
 class OpenAlexAdapter:
     name = "openalex"
+    role = "scholarly"
     endpoint = "https://api.openalex.org/works"
 
     def search(self, query: str, request: SearchRequest) -> SearchResponse:

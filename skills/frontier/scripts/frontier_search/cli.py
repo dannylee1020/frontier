@@ -20,7 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="frontier-search",
         description=(
-            "Search papers, Hugging Face models, and GitHub repositories "
+            "Search scholarly papers and Hugging Face trending papers "
             "and emit normalized JSON."
         ),
     )
@@ -53,12 +53,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Maximum results per provider and query (default: 20).",
     )
     parser.add_argument(
-        "--artifact-limit",
-        type=int,
-        default=20,
-        help="Maximum merged models and repositories to return (default: 20).",
-    )
-    parser.add_argument(
         "--timeout",
         type=float,
         default=20.0,
@@ -86,7 +80,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     since = args.since or until - timedelta(days=90)
     if len(args.query) > 3:
         parser.error("--query may be supplied at most three times")
-    if args.candidate_limit < 1 or args.per_source_limit < 1 or args.artifact_limit < 1:
+    if args.candidate_limit < 1 or args.per_source_limit < 1:
         parser.error("limits must be positive")
     if args.timeout <= 0 or args.max_retries < 0:
         parser.error("timeout must be positive and max-retries cannot be negative")
@@ -99,7 +93,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         per_source_limit=args.per_source_limit,
         timeout_seconds=args.timeout,
         max_retries=args.max_retries,
-        artifact_limit=args.artifact_limit,
     )
     try:
         run = run_search(request)

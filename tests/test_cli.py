@@ -75,7 +75,7 @@ class CliAndPipelineTests(unittest.TestCase):
         run = run_search(
             request,
             adapters=[FakeAdapter("good", records), FakeAdapter("bad", [], "offline")],
-            artifact_adapters=[],
+            momentum_adapters=[],
         )
         self.assertEqual(run.counts["raw"], 2)  # two records from the good adapter/query
         self.assertEqual(run.counts["date_filtered"], 1)

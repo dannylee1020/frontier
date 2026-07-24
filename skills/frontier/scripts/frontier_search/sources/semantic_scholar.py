@@ -12,6 +12,7 @@ from ..transport import request_json
 
 class SemanticScholarAdapter:
     name = "semantic_scholar"
+    role = "scholarly"
     endpoint = "https://api.semanticscholar.org/graph/v1/paper/search"
     fields = (
         "title,abstract,authors,year,publicationDate,venue,externalIds,url,"

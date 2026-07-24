@@ -1,4 +1,4 @@
-"""Provider-independent ranking for merged candidates."""
+"""Provider-independent ranking for merged paper candidates."""
 
 from __future__ import annotations
 
@@ -24,14 +24,23 @@ def _completeness(paper: Paper) -> int:
 
 
 def score_paper(paper: Paper, *, rrf_k: int = _RRF_K) -> float:
-    """Fuse within-provider ranks without comparing raw provider scores."""
+    """Fuse scholarly-provider ranks without treating momentum as evidence."""
 
     score = 0.0
     for ranks in paper.source_ranks.values():
         for rank in set(ranks):
             score += 1.0 / (rrf_k + max(rank, 1))
     paper.fusion_score = score
+
+    momentum_score = 0.0
+    for ranks in paper.momentum_ranks.values():
+        for rank in set(ranks):
+            momentum_score += 1.0 / (rrf_k + max(rank, 1))
+    paper.momentum_score = momentum_score
     paper.source_count = len(paper.sources)
+    paper.scholarly_source_count = len(paper.scholarly_sources) or len(
+        paper.source_ranks
+    )
     return score
 
 
@@ -39,12 +48,13 @@ def rank_papers(papers: list[Paper]) -> list[Paper]:
     for paper in papers:
         score_paper(paper)
 
-    # Reverse date ordering within a descending score/source grouping is easiest
-    # with a separate stable pass, keeping the final order deterministic.
+    # Momentum is deliberately a late tie-breaker. It can surface attention
+    # among similarly supported papers, but cannot outrank scholarly evidence.
     ranked = sorted(papers, key=lambda paper: paper.title.casefold())
     ranked = sorted(ranked, key=lambda paper: _completeness(paper), reverse=True)
     ranked = sorted(ranked, key=lambda paper: paper.published_at or "0000-00-00", reverse=True)
-    ranked = sorted(ranked, key=lambda paper: paper.source_count, reverse=True)
+    ranked = sorted(ranked, key=lambda paper: paper.momentum_score, reverse=True)
+    ranked = sorted(ranked, key=lambda paper: paper.scholarly_source_count, reverse=True)
     ranked = sorted(ranked, key=lambda paper: paper.fusion_score, reverse=True)
     return ranked
 

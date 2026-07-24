@@ -1,4 +1,4 @@
-"""Data models for the Frontier search pipeline.
+"""Data models for the Frontier research search pipeline.
 
 The models deliberately use only the Python standard library so the installed
 skill can run without a package installation step.
@@ -9,6 +9,16 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from typing import Any
+
+
+SCHOLARLY_SOURCES = frozenset({"openalex", "arxiv", "semantic_scholar"})
+MOMENTUM_SOURCES = frozenset({"huggingface_papers"})
+
+
+def source_role(source: str) -> str:
+    """Return the semantic role of a paper source."""
+
+    return "momentum" if source in MOMENTUM_SOURCES else "scholarly"
 
 
 def utc_now() -> str:
@@ -36,7 +46,6 @@ class SearchRequest:
     per_source_limit: int = 20
     timeout_seconds: float = 20.0
     max_retries: int = 2
-    artifact_limit: int = 20
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -47,7 +56,6 @@ class SearchRequest:
             "per_source_limit": self.per_source_limit,
             "timeout_seconds": self.timeout_seconds,
             "max_retries": self.max_retries,
-            "artifact_limit": self.artifact_limit,
         }
 
 
@@ -81,59 +89,17 @@ class SearchResponse:
     papers: list[SourceRecord] = field(default_factory=list)
     error: str | None = None
     duration_ms: int = 0
+    role: str = "scholarly"
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "source": self.source,
+            "role": self.role,
             "query": self.query,
             "status": self.status,
             "error": self.error,
             "duration_ms": self.duration_ms,
             "result_count": len(self.papers),
-        }
-
-
-@dataclass
-class ArtifactRecord:
-    """One provider's representation of a model or repository artifact."""
-
-    source: str
-    query: str
-    source_rank: int
-    artifact_type: str
-    title: str
-    description: str | None = None
-    url: str | None = None
-    identifier: str | None = None
-    owner: str | None = None
-    published_at: str | None = None
-    updated_at: str | None = None
-    language: str | None = None
-    license: str | None = None
-    tags: list[str] = field(default_factory=list)
-    authority: str = "unknown"
-    evidence_level: str = "metadata-only"
-    source_score: float | None = None
-    metadata: dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class ArtifactSearchResponse:
-    source: str
-    query: str
-    status: str
-    artifacts: list[ArtifactRecord] = field(default_factory=list)
-    error: str | None = None
-    duration_ms: int = 0
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "source": self.source,
-            "query": self.query,
-            "status": self.status,
-            "error": self.error,
-            "duration_ms": self.duration_ms,
-            "result_count": len(self.artifacts),
         }
 
 
@@ -153,13 +119,19 @@ class Paper:
     publication_status: str = "unknown"
     urls: list[str] = field(default_factory=list)
     sources: list[str] = field(default_factory=list)
+    scholarly_sources: list[str] = field(default_factory=list)
+    momentum_sources: list[str] = field(default_factory=list)
     matched_queries: list[str] = field(default_factory=list)
     source_ranks: dict[str, list[int]] = field(default_factory=dict)
+    momentum_ranks: dict[str, list[int]] = field(default_factory=dict)
     source_scores: dict[str, list[float]] = field(default_factory=dict)
     source_identifiers: dict[str, list[str]] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     evidence_level: str = "metadata-only"
     fusion_score: float = 0.0
+    momentum_score: float = 0.0
     source_count: int = 0
+    scholarly_source_count: int = 0
     title_key: str = ""
 
     def to_dict(self) -> dict[str, Any]:
@@ -176,63 +148,23 @@ class Paper:
             "publication_status": self.publication_status,
             "urls": list(self.urls),
             "sources": list(self.sources),
+            "scholarly_sources": list(self.scholarly_sources),
+            "momentum_sources": list(self.momentum_sources),
             "matched_queries": list(self.matched_queries),
             "source_ranks": {key: list(value) for key, value in self.source_ranks.items()},
+            "momentum_ranks": {
+                key: list(value) for key, value in self.momentum_ranks.items()
+            },
             "source_scores": {key: list(value) for key, value in self.source_scores.items()},
             "source_identifiers": {
                 key: list(value) for key, value in self.source_identifiers.items()
             },
-            "evidence_level": self.evidence_level,
-            "fusion_score": round(self.fusion_score, 8),
-            "source_count": self.source_count,
-        }
-
-
-@dataclass
-class Artifact:
-    """A normalized, possibly multi-query model or repository artifact."""
-
-    artifact_type: str
-    title: str
-    description: str | None = None
-    url: str | None = None
-    identifier: str | None = None
-    owner: str | None = None
-    published_at: str | None = None
-    updated_at: str | None = None
-    language: str | None = None
-    license: str | None = None
-    tags: list[str] = field(default_factory=list)
-    source: str = ""
-    evidence_level: str = "metadata-only"
-    matched_queries: list[str] = field(default_factory=list)
-    source_ranks: dict[str, list[int]] = field(default_factory=dict)
-    authority: str = "unknown"
-    metadata: dict[str, Any] = field(default_factory=dict)
-    fusion_score: float = 0.0
-    source_count: int = 0
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "artifact_type": self.artifact_type,
-            "title": self.title,
-            "description": self.description,
-            "url": self.url,
-            "identifier": self.identifier,
-            "owner": self.owner,
-            "published_at": self.published_at,
-            "updated_at": self.updated_at,
-            "language": self.language,
-            "license": self.license,
-            "tags": list(self.tags),
-            "source": self.source,
-            "matched_queries": list(self.matched_queries),
-            "source_ranks": {key: list(value) for key, value in self.source_ranks.items()},
-            "authority": self.authority,
-            "evidence_level": self.evidence_level,
             "metadata": dict(self.metadata),
+            "evidence_level": self.evidence_level,
             "fusion_score": round(self.fusion_score, 8),
+            "momentum_score": round(self.momentum_score, 8),
             "source_count": self.source_count,
+            "scholarly_source_count": self.scholarly_source_count,
         }
 
 
@@ -243,20 +175,31 @@ class SearchRun:
     responses: list[SearchResponse]
     papers: list[Paper]
     counts: dict[str, int]
-    artifact_responses: list[ArtifactSearchResponse] = field(default_factory=list)
-    artifacts: list[Artifact] = field(default_factory=list)
+    momentum_responses: list[SearchResponse] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         statuses: dict[str, dict[str, Any]] = {}
-        for response in [*self.responses, *self.artifact_responses]:
-            current = statuses.setdefault(response.source, {"status": "ok", "errors": []})
+        for response in [*self.responses, *self.momentum_responses]:
+            current = statuses.setdefault(
+                response.source,
+                {"role": response.role, "status": "ok", "errors": []},
+            )
+            current.setdefault("response_statuses", []).append(response.status)
             if response.status != "ok":
-                current["status"] = "partial" if current["status"] == "ok" else current["status"]
+                if current["status"] == "ok":
+                    current["status"] = (
+                        "rate-limited"
+                        if response.status == "rate-limited"
+                        else "partial"
+                    )
+                elif current["status"] == "rate-limited" and response.status != "rate-limited":
+                    current["status"] = "partial"
                 if response.error:
                     current["errors"].append(response.error)
+            elif current["status"] == "rate-limited":
+                current["status"] = "partial"
             current.setdefault("queries", []).append(response.query)
-            result_count = len(response.papers) if isinstance(response, SearchResponse) else len(response.artifacts)
-            current.setdefault("result_counts", []).append(result_count)
+            current.setdefault("result_counts", []).append(len(response.papers))
 
         return {
             "request": self.request.to_dict(),
@@ -264,9 +207,10 @@ class SearchRun:
             "source_status": statuses,
             "counts": dict(self.counts),
             "responses": [response.to_dict() for response in self.responses],
-            "artifact_responses": [response.to_dict() for response in self.artifact_responses],
+            "momentum_responses": [
+                response.to_dict() for response in self.momentum_responses
+            ],
             "papers": [paper.to_dict() for paper in self.papers],
-            "artifacts": [artifact.to_dict() for artifact in self.artifacts],
         }
 
 

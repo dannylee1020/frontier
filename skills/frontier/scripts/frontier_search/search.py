@@ -1,43 +1,33 @@
-"""Concurrent multi-provider search orchestration."""
+"""Concurrent multi-provider paper search orchestration."""
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from typing import Iterable
 
-from .artifacts import deduplicate_artifacts, rank_artifacts
 from .dedupe import deduplicate
-from .models import (
-    ArtifactSearchResponse,
-    SearchRequest,
-    SearchResponse,
-    SearchRun,
-    SourceRecord,
-    utc_now,
-)
+from .models import SearchRequest, SearchResponse, SearchRun, SourceRecord, utc_now
 from .rank import rank_papers
 from .sources import (
     ArxivAdapter,
-    GitHubAdapter,
-    HuggingFaceAdapter,
+    HuggingFacePapersAdapter,
     OpenAlexAdapter,
     SemanticScholarAdapter,
 )
-from .sources.base import (
-    ArtifactSourceAdapter,
-    SourceAdapter,
-    timed_artifact_search,
-    timed_search,
-)
+from .sources.base import SourceAdapter, timed_search
 
 
 def default_adapters() -> list[SourceAdapter]:
+    """Return the three canonical scholarly search providers."""
+
     return [OpenAlexAdapter(), ArxivAdapter(), SemanticScholarAdapter()]
 
 
-def default_artifact_adapters() -> list[ArtifactSourceAdapter]:
-    return [HuggingFaceAdapter(), GitHubAdapter()]
+def default_momentum_adapters() -> list[SourceAdapter]:
+    """Return paper-attention overlays kept separate from scholarly evidence."""
+
+    return [HuggingFacePapersAdapter()]
 
 
 def _record_in_date_range(record: SourceRecord, since: date, until: date) -> bool:
@@ -62,79 +52,89 @@ def _normalize_queries(queries: Iterable[str]) -> tuple[str, ...]:
     return tuple(result)
 
 
+def _run_task_groups(
+    scholarly_adapters: list[SourceAdapter],
+    momentum_adapters: list[SourceAdapter],
+    queries: tuple[str, ...],
+    request: SearchRequest,
+) -> tuple[list[SearchResponse], list[SearchResponse]]:
+    tasks = [
+        (adapter, query, "scholarly")
+        for adapter in scholarly_adapters
+        for query in queries
+    ] + [
+        (adapter, query, "momentum")
+        for adapter in momentum_adapters
+        for query in queries
+    ]
+    if not tasks:
+        return [], []
+    with ThreadPoolExecutor(
+        max_workers=min(max(len(tasks), 1), 16),
+        thread_name_prefix="frontier-search",
+    ) as pool:
+        futures = [
+            (pool.submit(timed_search, adapter, query, request), role)
+            for adapter, query, role in tasks
+        ]
+        scholarly_responses: list[SearchResponse] = []
+        momentum_responses: list[SearchResponse] = []
+        for future, role in futures:
+            response = future.result()
+            response.role = role
+            if role == "momentum":
+                momentum_responses.append(response)
+            else:
+                scholarly_responses.append(response)
+    scholarly_responses.sort(
+        key=lambda response: (response.source, response.query.casefold())
+    )
+    momentum_responses.sort(
+        key=lambda response: (response.source, response.query.casefold())
+    )
+    return scholarly_responses, momentum_responses
+
+
 def run_search(
     request: SearchRequest,
     *,
     adapters: list[SourceAdapter] | None = None,
-    artifact_adapters: list[ArtifactSourceAdapter] | None = None,
+    momentum_adapters: list[SourceAdapter] | None = None,
 ) -> SearchRun:
     queries = _normalize_queries(request.queries)
     if not queries:
         raise ValueError("At least one non-empty query is required")
     if request.since > request.until:
         raise ValueError("since must be on or before until")
-    if (
-        request.candidate_limit < 1
-        or request.per_source_limit < 1
-        or request.artifact_limit < 1
-    ):
+    if request.candidate_limit < 1 or request.per_source_limit < 1:
         raise ValueError("limits must be positive")
 
-    providers = adapters or default_adapters()
-    artifact_providers = (
-        default_artifact_adapters() if artifact_adapters is None else artifact_adapters
+    scholarly_providers = adapters if adapters is not None else default_adapters()
+    momentum_providers = (
+        momentum_adapters
+        if momentum_adapters is not None
+        else default_momentum_adapters()
     )
-    paper_tasks: list[tuple[SourceAdapter, str]] = [
-        (adapter, query) for adapter in providers for query in queries
-    ]
-    artifact_tasks: list[tuple[ArtifactSourceAdapter, str]] = [
-        (adapter, query) for adapter in artifact_providers for query in queries
-    ]
-    responses: list[SearchResponse] = []
-    artifact_responses: list[ArtifactSearchResponse] = []
-    total_tasks = len(paper_tasks) + len(artifact_tasks)
-    max_workers = min(max(total_tasks, 1), 16)
-    with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="frontier-search") as pool:
-        futures = [
-            pool.submit(timed_search, adapter, query, request)
-            for adapter, query in paper_tasks
-        ]
-        artifact_futures = [
-            pool.submit(timed_artifact_search, adapter, query, request)
-            for adapter, query in artifact_tasks
-        ]
-        for future in futures:
-            responses.append(future.result())
-        for future in artifact_futures:
-            artifact_responses.append(future.result())
+    responses, momentum_responses = _run_task_groups(
+        scholarly_providers, momentum_providers, queries, request
+    )
 
-    # Completion order is intentionally nondeterministic; sort artifacts so
-    # identical inputs produce stable JSON and fixture tests remain reproducible.
-    responses.sort(key=lambda response: (response.source, response.query.casefold()))
-    artifact_responses.sort(
-        key=lambda response: (response.source, response.query.casefold())
-    )
     raw_records = [record for response in responses for record in response.papers]
+    raw_momentum_records = [
+        record for response in momentum_responses for record in response.papers
+    ]
     filtered_records = [
         record
         for record in raw_records
         if _record_in_date_range(record, request.since, request.until)
     ]
-    merged = deduplicate(filtered_records)
+    filtered_momentum_records = [
+        record
+        for record in raw_momentum_records
+        if _record_in_date_range(record, request.since, request.until)
+    ]
+    merged = deduplicate([*filtered_records, *filtered_momentum_records])
     ranked = rank_papers(merged)[: request.candidate_limit]
-
-    raw_artifacts = [
-        artifact
-        for response in artifact_responses
-        for artifact in response.artifacts
-    ]
-    filtered_artifacts = [
-        artifact
-        for artifact in raw_artifacts
-        if _record_in_date_range(artifact, request.since, request.until)
-    ]
-    merged_artifacts = deduplicate_artifacts(filtered_artifacts)
-    ranked_artifacts = rank_artifacts(merged_artifacts)[: request.artifact_limit]
 
     return SearchRun(
         request=SearchRequest(
@@ -145,21 +145,19 @@ def run_search(
             per_source_limit=request.per_source_limit,
             timeout_seconds=request.timeout_seconds,
             max_retries=request.max_retries,
-            artifact_limit=request.artifact_limit,
         ),
         executed_at=utc_now(),
         responses=responses,
+        momentum_responses=momentum_responses,
         papers=ranked,
-        artifact_responses=artifact_responses,
-        artifacts=ranked_artifacts,
         counts={
-            "raw": len(raw_records),
-            "date_filtered": len(filtered_records),
+            "raw": len(raw_records) + len(raw_momentum_records),
+            "date_filtered": len(filtered_records) + len(filtered_momentum_records),
+            "raw_scholarly": len(raw_records),
+            "date_filtered_scholarly": len(filtered_records),
+            "raw_momentum": len(raw_momentum_records),
+            "date_filtered_momentum": len(filtered_momentum_records),
             "deduplicated": len(merged),
             "returned": len(ranked),
-            "raw_artifacts": len(raw_artifacts),
-            "date_filtered_artifacts": len(filtered_artifacts),
-            "deduplicated_artifacts": len(merged_artifacts),
-            "returned_artifacts": len(ranked_artifacts),
         },
     )

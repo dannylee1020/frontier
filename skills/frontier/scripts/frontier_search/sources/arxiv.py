@@ -15,6 +15,7 @@ _ARXIV = "http://arxiv.org/schemas/atom"
 
 class ArxivAdapter:
     name = "arxiv"
+    role = "scholarly"
     endpoint = "https://export.arxiv.org/api/query"
 
     def search(self, query: str, request: SearchRequest) -> SearchResponse:
