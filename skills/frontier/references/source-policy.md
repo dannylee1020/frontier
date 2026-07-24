@@ -1,33 +1,36 @@
 # Frontier source policy
 
-Frontier searches four technical lanes for a topic:
+Frontier has two report lanes and one paper-attention overlay.
 
-## Papers
+## Research Frontier
+
+Canonical scholarly providers:
 
 - **OpenAlex:** broad scholarly discovery and publication metadata.
 - **arXiv:** recent preprints, especially in computer science, mathematics, physics, and AI.
 - **Semantic Scholar:** discovery, abstracts, related metadata, open-access links, and citation signals.
 
-## Artifacts
+Momentum overlay:
 
-- **Hugging Face:** newly created relevant models and model-card records.
-- **GitHub:** newly created relevant repositories containing models, tools, harnesses, benchmarks, or implementations.
+- **Hugging Face Papers:** current attention feed for papers. It is locally topic-filtered and merged by arXiv ID, DOI, or conservative title matching.
 
-These are discovery sources, not popularity feeds. Stars, downloads, and likes do not establish technical quality or novelty.
+Hugging Face rank, upvotes, and feed submission date do not establish technical quality, novelty, or scholarly corroboration. Preserve the paper's publication date separately from `momentum_observed_at`.
 
-## Company technical publications
+## Company Frontier
 
-The host agent searches the approved official research/engineering domains in `company-sources.md` in parallel with the bundled utility. Only substantive research findings, methods, models, evaluations, harnesses, and technical tools qualify.
+The host agent searches the approved official research/engineering domains in [company-sources.md](company-sources.md) in parallel with the bundled paper utility. Only substantive research findings, methods, models, evaluations, harnesses, and technical tools qualify.
 
-A company publication is primary evidence that the organization made a claim. It is not independent validation of that claim.
+A company publication is primary evidence that the organization made a claim. It is not independent validation of that claim and must not raise a paper's evidence level.
 
-## Advancement grouping
+## Separate insight semantics
 
-Papers, company publications, model cards, repositories, and evaluation links describing the same work are grouped into one advancement while retaining every source URL and evidence type.
+- **Research insight:** grounded in a scholarly paper record; may be labeled published, preprint, abstract-level, full-text, or trending on Hugging Face.
+- **Company insight:** grounded in an official technical publication; label the organization and attribute claims as first-party.
+- **Cross-lane connection:** a thematic or explicit link between the two. Do not collapse the records or count company activity as scholarly corroboration.
 
 ## Source status
 
-The report must distinguish `ok`, `partial`, `rate-limited`, `unavailable`, and `error` for each lane. Paper status must distinguish `published`, `preprint`, `submitted`, `corrected`, `retracted`, and `unknown` whenever records support it.
+The report must distinguish `ok`, `partial`, `rate-limited`, `unavailable`, and `error` for each provider or lane. Paper status must distinguish `published`, `preprint`, `submitted`, `corrected`, `retracted`, and `unknown` whenever records support it.
 
 ## Partial results
 

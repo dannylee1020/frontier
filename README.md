@@ -1,15 +1,12 @@
 # Frontier
 
-A portable agent skill for discovering and understanding recent frontier-AI advances.
+A portable agent skill for discovering and understanding recent frontier-AI research.
 
-Frontier searches:
+Frontier reports two complementary views:
 
-- Research papers
-- Official technical publications
-- Hugging Face models and model cards
-- Relevant GitHub repositories
+- Research papers from OpenAlex, arXiv, and Semantic Scholar
+- Official technical publications from frontier companies
 
-It combines related findings into a structured, evidence-grounded report.
 
 ## Supported agents
 
@@ -27,18 +24,19 @@ The installer requires `curl`, `tar`, and Python 3.12 or newer.
 
 ## Search behavior
 
-For each topic, Frontier searches papers, official technical publications, Hugging Face, and GitHub in parallel. It then:
+For each topic, Frontier searches the three scholarly providers and the Hugging Face Papers attention feed in parallel with host-native searches of approved company technical domains. It then:
 
-- Filters results by the requested date range
-- Removes duplicates and groups related findings
-- Ranks results by relevance, evidence, and authority
-- Produces one structured report with sources and uncertainties
+- Filters papers by the requested publication date range
+- Deduplicates paper records by DOI, arXiv ID, Semantic Scholar ID, and conservative title matching
+- Keeps scholarly evidence and company first-party claims in separate insight lanes
+- Preserves Hugging Face momentum separately from publication date and evidence quality
+- Produces a concise report with Research Frontier, Company Frontier, connections, sources, and uncertainties
 
-Popularity signals such as stars, downloads, and likes are not treated as technical evidence.
+Popularity signals such as Hugging Face feed rank and upvotes are contextual only.
 
 ## Search utility
 
-The bundled utility performs deterministic paper, model, and repository discovery:
+The bundled utility performs deterministic scholarly and Hugging Face Papers discovery:
 
 ```bash
 python3.12 <skill-directory>/scripts/search.py \
@@ -52,5 +50,4 @@ Optional environment variables:
 
 - `SEMANTIC_SCHOLAR_API_KEY` — improve Semantic Scholar access
 - `OPENALEX_EMAIL` — use the OpenAlex polite pool
-- `GITHUB_TOKEN` — improve GitHub API rate limits
 - `FRONTIER_USER_AGENT` — customize the request user agent

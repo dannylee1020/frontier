@@ -1,6 +1,6 @@
 # Official technical publication sources
 
-Frontier tracks official technical publications from the following organizations. Use the host agent's native web search in parallel with the bundled paper/artifact search, restricting each query to the listed domains and paths.
+Frontier tracks official technical publications from the following organizations. Use the host agent's native web search in parallel with the bundled paper search, restricting each query to the listed domains and paths.
 
 | Organization | Preferred technical paths | Notes |
 |---|---|---|
@@ -12,8 +12,8 @@ Frontier tracks official technical publications from the following organizations
 | NVIDIA | `research.nvidia.com`, `developer.nvidia.com/blog` | Models, systems, hardware/software, and inference research.
 | Kimi / Moonshot AI | `kimi.com/blog`, `moonshot.ai` | Kimi model, agent, training, and serving research.
 | Qwen | `qwenlm.github.io/blog`, `qwen.ai/research` | Qwen technical posts, model reports, and evaluations.
-| GLM / Z.ai | `z.ai`, `docs.z.ai` | Official GLM technical documentation and model findings; use `zai-org` artifacts for model/code follow-up.
-| DeepSeek | `api-docs.deepseek.com/news`, `api-docs.deepseek.com/updates` | Official technical model and API announcements; verify research claims against linked reports and artifacts.
+| GLM / Z.ai | `z.ai`, `docs.z.ai` | Official GLM technical documentation and model findings.
+| DeepSeek | `api-docs.deepseek.com/news`, `api-docs.deepseek.com/updates` | Official technical model and API announcements; verify research claims against linked reports or papers.
 
 ## Search contract
 

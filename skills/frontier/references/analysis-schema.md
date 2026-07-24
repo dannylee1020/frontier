@@ -1,9 +1,12 @@
 # Analysis contracts
 
-## Paper analysis
+Frontier keeps Research Frontier and Company Frontier analyses separate.
 
-Each analysis must include:
+## Research insight
 
+Each paper analysis must include:
+
+- `insight_type`: `research`
 - Stable paper reference
 - Research question
 - Method
@@ -13,6 +16,7 @@ Each analysis must include:
 - Limitations
 - Publication status
 - Evidence level
+- Hugging Face momentum status, if present
 - Confidence
 - Unknowns
 - Supporting URLs
@@ -20,30 +24,43 @@ Each analysis must include:
 Evidence levels:
 
 - `metadata-only`: title, author, venue, date, or identifiers only.
-- `abstract-level`: the abstract was available and supports the statement.
+- `abstract-level`: the paper abstract or equivalent paper summary was available and supports the statement.
 - `full-text`: an accessible paper was actually read.
+
+Hugging Face momentum labels:
+
+- `not_observed`
+- `trending-on-huggingface`
+- `momentum-discovered`: found through the momentum feed but not returned by a canonical scholarly provider.
+
+Momentum is attention context, not evidence quality or independent corroboration.
 
 Do not fill missing methodological details from assumptions or from a related paper.
 
-## Artifact analysis
+## Company insight
 
-Each model, model-card, repository, or company-publication analysis must include:
+Each official publication analysis must include:
 
-- Stable artifact reference
-- Artifact type
+- `insight_type`: `company`
+- Company and publication title
+- `publication_type`: `research`, `engineering`, or `technical_release`
 - Technical contribution
 - Why it matters
-- Authority classification
-- Evidence level
-- Related papers and artifacts
-- Limitations
+- Authority: `first-party`
+- Evidence level: `metadata-only` or `full-text`
+- Related papers, if explicitly linked
+- Limitations and unestablished claims
 - Confidence
 - Supporting URLs
 
-Artifact evidence levels:
+A company publication is authoritative evidence that the organization made the claim. It is not independent validation of performance or general truth.
 
-- `metadata-only`: listing metadata only.
-- `card-or-readme`: the model card or repository README was inspected.
-- `full-text`: linked technical documentation, implementation, or company publication was inspected in detail.
+## Claim states
 
-Authority is not quality. `primary-official` means that the record is first-party; it does not independently validate performance claims.
+The internal record must distinguish:
+
+- `announced`: a primary source reports the work.
+- `supported`: technical evidence is available at the recorded evidence level.
+- `independently corroborated`: an external evaluation or reproduction supports it.
+
+A company claim cannot become `independently corroborated` merely because it is official. A Hugging Face momentum signal cannot change a claim state.

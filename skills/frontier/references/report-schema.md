@@ -2,7 +2,7 @@
 
 ## Default brief
 
-The default output is a concise one-page briefing:
+The default output is a concise one-page briefing with two independent insight lanes:
 
 ```markdown
 # Frontier Brief: <topic>
@@ -11,32 +11,36 @@ The default output is a concise one-page briefing:
 
 ## Bottom Line
 
-## Notable Advances
+## Research Frontier
 
-### <Plain-language advancement>
+### <Paper insight>
 
-What changed and why it matters, in two or three sentences.
+What changed and why it matters.
 
-**Evidence:** [paper], [official post], [model/code] · preprint / published / official claim
+**Evidence:** preprint / published / abstract-level / full-text / trending on Hugging Face
 
-## Frontier Company Activity
+## Company Frontier
 
-- **<Company>:** one meaningful activity
+### <Company publication insight>
 
-## What It Adds Up To
+What the organization reported and why it matters.
+
+## What Connects Them
 
 ## Sources and Caveats
 ```
 
 Brief rules:
 
-- Include at most five notable advancements.
+- Include at most three Research Frontier items and three Company Frontier items.
+- Rank the two lanes independently.
 - Lead with conclusions, not search methodology.
 - Use plain language and avoid unnecessary jargon.
 - Include only the most useful supporting links.
 - Mention metrics only when they materially explain significance.
-- Omit empty company sections.
-- Mention source failures only when they could change the conclusion.
+- Attribute company claims explicitly.
+- Treat Hugging Face ranking and upvotes as momentum context only.
+- Say when a lane was unavailable; do not imply an unavailable lane had no results.
 - Do not include candidate counts, query variants, or full comparison tables.
 
 ## Deep report
@@ -48,28 +52,24 @@ Use this format only when the user asks for more detail:
 
 ## Executive Summary
 ## Search Scope and Source Health
-## Key Technological Advancements
-### <Advancement>
-## Cross-Advancement Comparison
-## Emerging Technical Directions
+## Research Frontier
+### <Paper insight>
+## Company Frontier
+### <Company insight>
+## What Connects Them
 ## Open Questions and Limitations
 ## References
 ## Reproducibility Log
 ```
 
-Each advancement must retain:
+Each insight must retain internally:
 
-- Type: `method`, `model`, `harness`, `tool`, `benchmark`, or `system`.
-- Technical contribution.
-- Why it matters.
-- Supporting paper, company-publication, model-card, repository, and evaluation links.
-- Authority and evidence level.
-- Limitations and confidence.
+- Insight type: `research` or `company`
+- Technical contribution
+- Why it matters
+- Supporting paper or official-publication links
+- Authority and evidence level
+- Hugging Face momentum metadata for research insights, when present
+- Limitations and confidence
 
-Every major synthesized claim must cite supporting URLs. The internal evidence record must distinguish:
-
-- `announced`: a primary source reports the work.
-- `supported`: technical evidence is available.
-- `independently corroborated`: an external evaluation or reproduction supports it.
-
-Company claims must be attributed. A model card or repository listing does not independently establish performance. The report must label preprints and disclose failed or unavailable source lanes when material.
+Every major synthesized claim must cite supporting URLs. The internal evidence record must distinguish `announced`, `supported`, and `independently corroborated`. Company claims must be attributed. The report must label preprints and disclose failed or unavailable source lanes when material.
