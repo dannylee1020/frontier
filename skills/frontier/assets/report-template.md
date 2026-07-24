@@ -1,51 +1,32 @@
-# Frontier AI: <topic>
+# Frontier Brief: <topic>
 
-## Executive Summary
+> As of <date> · covering <window>
 
-<!-- State the strongest evidence-grounded technical conclusions and confidence. -->
+## Bottom Line
 
-## Search Scope and Source Health
+<!-- State the most important conclusion in two or three sentences. -->
 
-- Searched at:
-- Date window:
-- Query variants:
-- Paper sources:
-- Company domains:
-- Artifact sources:
-- Evidence boundary:
-- Failed or unavailable lanes:
+## Notable Advances
 
-## Key Technological Advancements
+### <Plain-language advancement>
 
-### <Advancement title>
+What changed and why it matters, in two or three sentences.
 
-- **Type:** method / model / harness / tool / benchmark / system
-- **Technical contribution:**
-- **Why it matters:**
-- **Evidence status:** announced / supported / independently corroborated
-- **Authority:**
-- **Evidence level:**
-- **Supporting papers:**
-- **Company publications:**
-- **Models and cards:**
-- **Repositories:**
-- **Limitations:**
-- **Confidence:**
+- **Evidence:** preprint / published / official claim / independently evaluated
+- **Sources:** [paper] · [official post] · [model or code]
 
-## Cross-Advancement Comparison
+<!-- Include no more than five advancements. -->
 
-| Advancement | Type | Technical change | Evidence | Authority | Limitations |
-|---|---|---|---|---|---|
+## Frontier Company Activity
 
-## Emerging Technical Directions
+- **<Company>:** one meaningful technical activity.
 
-## Open Questions and Limitations
+<!-- Omit this section when there is no relevant company activity. -->
 
-## References
+## What It Adds Up To
 
-## Reproducibility Log
+<!-- Summarize the broader technical direction in two or three bullets. -->
 
-- Run timestamp:
-- Provider status:
-- Candidate counts:
-- Company domains searched:
+## Sources and Caveats
+
+<!-- Include the most useful links and only material limitations or source failures. -->
