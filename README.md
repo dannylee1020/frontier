@@ -29,7 +29,7 @@ For each topic, Frontier searches the three scholarly providers and the Hugging 
 - Filters papers by the requested publication date range
 - Deduplicates paper records by DOI, arXiv ID, Semantic Scholar ID, and conservative title matching
 - Keeps scholarly evidence and company first-party claims in separate insight lanes
-- Preserves Hugging Face momentum separately from publication date and evidence quality
+- Hugging Face momentum separately from publication date and evidence quality
 - Produces a concise report with Research Frontier, Company Frontier, connections, sources, and uncertainties
 
 Popularity signals such as Hugging Face feed rank and upvotes are contextual only.
