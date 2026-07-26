@@ -1,19 +1,19 @@
-# Official technical publication sources
+# Official frontier-lab sources
 
-Frontier tracks official technical publications from the following organizations. Use the host agent's native web search in parallel with the bundled paper search, restricting each query to the listed domains and paths.
+Frontier tracks substantive official publications from the following organizations. Use the host agent's native web search in parallel with the bundled paper search, restricting each query to the listed domains and paths.
 
 | Organization | Preferred technical paths | Notes |
 |---|---|---|
-| Anthropic | `anthropic.com/research`, `anthropic.com/engineering` | Research findings, evaluations, agent and safety engineering.
-| OpenAI | `openai.com/research`, `openai.com/index` | Research, technical reports, model and system findings.
-| Google DeepMind | `deepmind.google/blog` | Research, models, science, and safety.
-| Meta | `ai.meta.com/blog`, `research.facebook.com` | AI research and open-model findings.
-| Microsoft | `microsoft.com/en-us/research/blog` | Research and engineering findings.
-| NVIDIA | `research.nvidia.com`, `developer.nvidia.com/blog` | Models, systems, hardware/software, and inference research.
-| Kimi / Moonshot AI | `kimi.com/blog`, `moonshot.ai` | Kimi model, agent, training, and serving research.
-| Qwen | `qwenlm.github.io/blog`, `qwen.ai/research` | Qwen technical posts, model reports, and evaluations.
-| GLM / Z.ai | `z.ai`, `docs.z.ai` | Official GLM technical documentation and model findings.
-| DeepSeek | `api-docs.deepseek.com/news`, `api-docs.deepseek.com/updates` | Official technical model and API announcements; verify research claims against linked reports or papers.
+| Anthropic | `anthropic.com/research`, `anthropic.com/engineering` | Research findings, evaluations, agent and safety engineering, and material capability direction.
+| OpenAI | `openai.com/research`, `openai.com/index` | Research, technical reports, model and system findings, and substantive capability releases.
+| Google DeepMind | `deepmind.google/blog` | Research, models, science, safety, and technical system direction.
+| Meta | `ai.meta.com/blog`, `research.facebook.com` | AI research, open-model findings, systems, and evaluations.
+| Microsoft | `microsoft.com/en-us/research/blog` | Research, engineering findings, infrastructure, and developer systems.
+| NVIDIA | `research.nvidia.com`, `developer.nvidia.com/blog` | Models, systems, hardware/software, inference research, and deployment tooling.
+| Kimi / Moonshot AI | `kimi.com/blog`, `moonshot.ai` | Kimi model, agent, training, serving research, and technical releases.
+| Qwen | `qwenlm.github.io/blog`, `qwen.ai/research` | Qwen technical posts, model reports, evaluations, and capability releases.
+| GLM / Z.ai | `z.ai`, `docs.z.ai` | Official GLM research, model findings, technical documentation, and releases.
+| DeepSeek | `api-docs.deepseek.com/news`, `api-docs.deepseek.com/updates` | Official technical model and API publications; verify research claims against linked reports or papers.
 
 ## Search contract
 
@@ -28,14 +28,23 @@ Search result pages are candidate records. The host agent must inspect selected 
 
 ## Inclusion policy
 
-Include a company publication when it reports at least one of:
+Include an official publication when it reports or reveals at least one of:
 
 - New model, architecture, algorithm, training, or inference method
 - New agent or harness design
-- New benchmark or evaluation result
+- New benchmark, evaluation, safety, or deployment result
 - Substantive empirical finding
 - Technical tool or implementation that enables a new capability
+- Capability release that materially changes what is available
+- Infrastructure or developer-platform move with technical significance
+- Repeated technical priority that provides a credible strategic signal
 
-Exclude general company news, partnerships, funding, hiring, product marketing, and ordinary availability announcements.
+Classify the selected publication by contribution: `research`, `engineering`, `capability_release`, `infrastructure`, `evaluation`, or `strategic_signal`.
 
-A company publication is authoritative evidence that the organization made a claim. It is not independent validation of that claim.
+A company publication is a company or lab move even when it is not research. It becomes evidence for a broader landscape direction only when supported by repeated activity, multiple organizations, independent research, external validation, or adoption.
+
+## Exclusion policy
+
+Exclude general company news, partnerships without technical consequences, funding, hiring, generic thought leadership, marketing without technical substance, and ordinary availability announcements. Do not omit a technically substantive release merely because it is also a product announcement.
+
+A company publication is authoritative evidence that the organization made a claim or took an action. It is not independent validation of that claim.

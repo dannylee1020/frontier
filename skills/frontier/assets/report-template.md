@@ -4,36 +4,58 @@
 
 ## Bottom Line
 
-<!-- State the most important conclusion in two or three sentences. -->
+<!-- State the most important update to the reader's mental model in two or three sentences. -->
 
-## Research Frontier
+## Frontier Shifts
 
-### <Paper insight>
+### <Material landscape change>
 
-What changed and why it matters, in two or three sentences.
+- **Previous baseline:** What was established before, or `not established`.
+- **What changed:** The new capability, technique, finding, or direction.
+- **Evidence:** Research / engineering / release / evaluation / strategic signal.
+- **Confidence:** High / medium / low.
+- **Why it matters:** Technical and practical significance.
 
-- **Evidence:** preprint / published / abstract-level / full-text
-- **Momentum:** not observed / trending on Hugging Face
-- **Sources:** [paper]
+<!-- Include no more than three shifts. Do not call an isolated company announcement an industry shift. -->
 
-<!-- Include no more than three paper insights. -->
+## New Techniques and Findings
 
-## Company Frontier
+### <Novel technique or finding>
 
-### <Company publication insight>
+What is new relative to prior work, what was evaluated, and why it matters.
 
-What the organization reported and why it matters.
+- **Type:** Research advance / engineering advance / evaluation finding
+- **Evidence:** Published / preprint / abstract-level / full-text
+- **Readiness:** Exploratory / reproducible / deployed / unknown
+- **Sources:** [paper or technical source]
 
-- **Type:** research / engineering / technical release
-- **Authority:** first-party claim
-- **Source:** [official publication]
+<!-- Include no more than five items. -->
 
-<!-- Include no more than three company insights. Omit this lane only when unavailable or empty. -->
+## Lab and Deployment Moves
 
-## What Connects Them
+### <Material company or lab move>
 
-<!-- Summarize shared directions, convergence, or divergence without merging evidence. -->
+What the organization reported, released, implemented, or prioritized, and what direction it may signal.
 
-## Sources and Caveats
+- **Type:** Capability release / infrastructure move / strategic signal / engineering advance
+- **Authority:** First-party claim or action
+- **External validation:** Available / limited / none
+- **Sources:** [official publication]
 
-<!-- Include the most useful links, source failures, material limitations, and uncertainty. -->
+<!-- Include no more than three items. A company move is not automatically an industry trend. -->
+
+## Landscape Direction
+
+<!-- Explain convergence, divergence, and which directions appear to be strengthening. -->
+
+## Implications
+
+- **Engineers:** What may become buildable, reproducible, or production-relevant?
+- **Founders:** What capability, cost curve, workflow, or product assumption may change?
+- **Investors:** What technical direction, market structure, or timeline may deserve attention?
+
+<!-- Tailor these to the requested audience when known. -->
+
+## Watchlist and Caveats
+
+<!-- Include unresolved claims, weak evidence, contradictions, source failures, and developments worth monitoring. -->
