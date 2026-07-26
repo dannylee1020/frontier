@@ -4,6 +4,7 @@
 # Examples:
 #   curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh | sh
 #   curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh | sh -s -- --agent codex
+#   curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh | sh -s -- --agent pi
 
 set -eu
 

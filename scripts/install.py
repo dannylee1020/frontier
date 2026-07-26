@@ -16,6 +16,8 @@ AGENT_DESTINATIONS = {
     # destination for Codex and OpenCode avoids duplicate skill definitions.
     "codex": Path.home() / ".agents" / "skills" / "frontier",
     "opencode": Path.home() / ".agents" / "skills" / "frontier",
+    # Pi discovers the shared Agent Skills directory as well.
+    "pi": Path.home() / ".agents" / "skills" / "frontier",
 }
 
 
@@ -84,7 +86,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Install or remove the Frontier agent skill.")
     parser.add_argument(
         "--agent",
-        choices=["claude", "codex", "opencode", "all"],
+        choices=["claude", "codex", "opencode", "pi", "all"],
         default="all",
         help="Target runtime (default: all).",
     )
@@ -103,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
         print("Frontier requires Python 3.12 or newer.", file=sys.stderr)
         return 2
     args = build_parser().parse_args(argv)
-    agents = ["claude", "codex", "opencode"] if args.agent == "all" else [args.agent]
+    agents = ["claude", "codex", "opencode", "pi"] if args.agent == "all" else [args.agent]
     if args.uninstall:
         return uninstall(agents, dry_run=args.dry_run)
     return install(agents, force=args.force, dry_run=args.dry_run)
