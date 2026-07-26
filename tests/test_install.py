@@ -59,7 +59,11 @@ class InstallerTests(unittest.TestCase):
             with patch.object(install, "AGENT_DESTINATIONS", destinations):
                 self.assertEqual(install.install(["claude"], dry_run=False), 0)
                 self.assertTrue((destinations["claude"] / "SKILL.md").is_file())
-                self.assertEqual(install.install(["claude"], dry_run=False), 2)
+                stale_file = destinations["claude"] / "stale.txt"
+                stale_file.write_text("stale installation content")
+                self.assertEqual(install.install(["claude"], dry_run=False), 0)
+                self.assertFalse(stale_file.exists())
+                self.assertTrue((destinations["claude"] / "SKILL.md").is_file())
                 self.assertEqual(install.install(["claude"], force=True), 0)
                 self.assertEqual(install.uninstall(["claude"]), 0)
                 self.assertFalse(destinations["claude"].exists())

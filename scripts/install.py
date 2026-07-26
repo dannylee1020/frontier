@@ -39,6 +39,12 @@ def destinations(agents: Iterable[str]) -> list[tuple[str, Path]]:
 
 
 def install(agents: Iterable[str], *, force: bool = False, dry_run: bool = False) -> int:
+    """Install fresh copies, replacing existing destinations by default.
+
+    ``force`` remains accepted for compatibility with existing callers and
+    commands, but replacement is now always the install behavior.
+    """
+    del force
     source = source_dir()
     if not source.is_dir():
         print(f"source skill not found: {source}", file=sys.stderr)
@@ -49,9 +55,6 @@ def install(agents: Iterable[str], *, force: bool = False, dry_run: bool = False
         if dry_run:
             continue
         if destination.exists() or destination.is_symlink():
-            if not force:
-                print(f"destination exists; use --force: {destination}", file=sys.stderr)
-                return 2
             if destination.is_dir() and not destination.is_symlink():
                 shutil.rmtree(destination)
             else:
@@ -86,7 +89,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Target runtime (default: all).",
     )
     parser.add_argument("--uninstall", action="store_true", help="Remove installed copies.")
-    parser.add_argument("--force", action="store_true", help="Replace existing copies when installing.")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Compatibility flag; existing copies are replaced by default.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print actions without changing files.")
     return parser
 

@@ -30,7 +30,7 @@ Its output is organized around:
 curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh | sh
 ```
 
-The installer requires `curl`, `tar`, and Python 3.12 or newer.
+The installer requires `curl`, `tar`, and Python 3.12 or newer. Re-running it replaces existing Frontier installations with the downloaded version.
 
 ## Evidence model
 
