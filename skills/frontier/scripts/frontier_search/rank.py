@@ -28,14 +28,14 @@ def score_paper(paper: Paper, *, rrf_k: int = _RRF_K) -> float:
 
     score = 0.0
     for ranks in paper.source_ranks.values():
-        for rank in set(ranks):
-            score += 1.0 / (rrf_k + max(rank, 1))
+        if ranks:
+            score += 1.0 / (rrf_k + max(min(ranks), 1))
     paper.fusion_score = score
 
     momentum_score = 0.0
     for ranks in paper.momentum_ranks.values():
-        for rank in set(ranks):
-            momentum_score += 1.0 / (rrf_k + max(rank, 1))
+        if ranks:
+            momentum_score += 1.0 / (rrf_k + max(min(ranks), 1))
     paper.momentum_score = momentum_score
     paper.source_count = len(paper.sources)
     paper.scholarly_source_count = len(paper.scholarly_sources) or len(
@@ -54,6 +54,13 @@ def rank_papers(papers: list[Paper]) -> list[Paper]:
     ranked = sorted(ranked, key=lambda paper: _completeness(paper), reverse=True)
     ranked = sorted(ranked, key=lambda paper: paper.published_at or "0000-00-00", reverse=True)
     ranked = sorted(ranked, key=lambda paper: paper.momentum_score, reverse=True)
+    ranked = sorted(
+        ranked,
+        key=lambda paper: len(
+            {query.casefold() for query in paper.matched_queries if query}
+        ),
+        reverse=True,
+    )
     ranked = sorted(ranked, key=lambda paper: paper.scholarly_source_count, reverse=True)
     ranked = sorted(ranked, key=lambda paper: paper.fusion_score, reverse=True)
     return ranked

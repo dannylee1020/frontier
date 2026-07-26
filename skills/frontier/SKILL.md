@@ -34,16 +34,31 @@ Before searching, infer or ask for:
 - Audience or role when relevant: engineer, founder, investor, researcher, or general technical reader
 - Output mode: `brief` by default, `deep` when explicitly requested
 
-Create no more than three focused query variants. Record the exact variants in the internal reproducibility record. Use the same variants across scholarly providers and Hugging Face Papers; company searches use site-restricted adaptations.
+Create a discovery portfolio of two or three semantically distinct query branches:
+
+1. **Precision anchor** — the canonical technical framing.
+2. **Lexical or ontology expansion** — terminology used by another relevant research community.
+3. **Adjacent mechanism or application** — a related approach likely to contain relevant work, included only when it adds a genuinely different search surface.
+
+Use short technical search phrases rather than sentences. Do not pad the portfolio with paraphrases, and do not use baseline, evaluation, and limitations as fixed discovery buckets. Two branches are enough for a narrow topic; three is the default for a broad or ambiguous topic. Record the exact branches and their purpose in the internal reproducibility record. Use the same branches across scholarly providers and Hugging Face Papers; company searches use site-restricted OR adaptations.
 
 ## Phase 2: collect evidence
 
-The bundled utility automatically shows provider progress while it runs. In an
-interactive terminal this is a compact live display with one row per provider;
-in captured agent output it becomes concise append-only text. This behavior is
-shared by Claude Code, Codex, OpenCode, and Pi and requires no host-specific
-setup. Progress is written to `stderr`, so the JSON artifact on `stdout` or
-`--output` remains machine-readable.
+Keep visible progress to three stage-level updates:
+
+```text
+/frontier · framing · <topic> · <window> · <N> discovery angles
+/frontier · collecting · 4 research sources · 10 labs
+/frontier · synthesizing · <paper count> papers · <lab count> lab records
+```
+
+The bundled utility supplements these stages with one in-place status line in
+an interactive terminal or one compact completion and source-health line in
+captured output. It does not print query text, provider lifecycle rows, or raw
+errors. Detailed provider states and errors remain in the structured artifact.
+Progress is written to `stderr`, so JSON on `stdout` or `--output` remains
+machine-readable. Host-native web-search activity cards are controlled by the
+host; minimize them by batching searches where supported.
 
 ### Scholarly research evidence
 
@@ -51,15 +66,16 @@ Run the bundled utility:
 
 ```bash
 python3.12 <skill-directory>/scripts/search.py \
-  --query "primary topic" \
-  --query "related terminology" \
+  --query "canonical technical framing" \
+  --query "alternate field terminology" \
+  --query "adjacent mechanism or application" \
   --since YYYY-MM-DD \
   --until YYYY-MM-DD \
   --candidate-limit 30 \
   --output /tmp/frontier-results.json
 ```
 
-The utility concurrently queries:
+The utility searches:
 
 - OpenAlex, arXiv, and Semantic Scholar for scholarly papers
 - Hugging Face Papers for the current paper-attention feed
@@ -70,7 +86,7 @@ Hugging Face Papers is a global feed, so the utility applies a conservative loca
 
 ### Frontier-lab and deployment evidence
 
-In parallel, use native site-restricted web search for the organizations in [company-sources.md](references/company-sources.md). Use one search per organization or parallel subagents when available. Restrict searches to approved technical paths and the topic.
+In parallel, use native site-restricted web search for every organization in [company-sources.md](references/company-sources.md). Build one search per organization whose topic clause OR-combines the discovery branches, then batch those organization searches into the fewest host calls supported by the runtime. Restrict searches to approved technical paths and the date window. Do not issue one company search per branch.
 
 Include substantive publications that reveal one or more of the following:
 
@@ -168,7 +184,25 @@ Do not promote an isolated announcement to a landscape shift. Make the uncertain
 
 ## Phase 5: establish baseline and analyze
 
-For shortlisted claims of novelty or landscape change, inspect prior work or run a focused historical lookup. Record the exact baseline evidence internally. If a reliable prior baseline cannot be established, use `not established` rather than inferring novelty from recency, authority, or attention.
+After initial deduplication and clustering, deepen only shortlisted claims that
+lack evidence needed for synthesis. Generate no more than three targeted
+follow-up queries across the run, each attached to a specific candidate move
+and a missing evidence need:
+
+- prior baseline,
+- evaluation or external validation,
+- contradictory evidence or known limitations.
+
+Do not automatically run a second pass when the discovery evidence already
+supports the claim. Follow-up matches enrich that claim's internal evidence
+record; repeated matches from the same provider are not independent
+corroboration and do not increase scholarly source count. Record the exact
+follow-up queries and why each was needed.
+
+For shortlisted claims of novelty or landscape change, inspect prior work or
+run the focused historical lookup above. If a reliable prior baseline cannot be
+established, use `not established` rather than inferring novelty from recency,
+authority, or attention.
 
 Build a detailed internal evidence record from a diverse, relevant set of papers and company publications. The internal record may contain more material than the final brief.
 

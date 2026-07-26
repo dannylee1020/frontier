@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
+import threading
 import time
 from typing import Iterable
 
@@ -53,6 +54,16 @@ def _normalize_queries(queries: Iterable[str]) -> tuple[str, ...]:
             seen.add(key)
             result.append(cleaned)
     return tuple(result)
+
+
+def _timed_search_with_limit(
+    adapter: SourceAdapter,
+    query: str,
+    request: SearchRequest,
+    gate: threading.BoundedSemaphore,
+) -> SearchResponse:
+    with gate:
+        return timed_search(adapter, query, request)
 
 
 def _run_task_groups(
@@ -105,12 +116,29 @@ def _run_task_groups(
         source: [] for source in providers
     }
     provider_completed: dict[str, int] = {source: 0 for source in providers}
+    adapter_gates: dict[int, threading.BoundedSemaphore] = {}
+    for adapter, _query, _role in tasks:
+        key = id(adapter)
+        if key in adapter_gates:
+            continue
+        max_concurrency = max(
+            1,
+            int(getattr(adapter, "max_concurrency", len(queries))),
+        )
+        adapter_gates[key] = threading.BoundedSemaphore(max_concurrency)
+
     with ThreadPoolExecutor(
         max_workers=min(max(len(tasks), 1), 16),
         thread_name_prefix="frontier-search",
     ) as pool:
         future_tasks = {
-            pool.submit(timed_search, adapter, query, request): (adapter, query, role)
+            pool.submit(
+                _timed_search_with_limit,
+                adapter,
+                query,
+                request,
+                adapter_gates[id(adapter)],
+            ): (adapter, query, role)
             for adapter, query, role in tasks
         }
         scholarly_responses: list[SearchResponse] = []

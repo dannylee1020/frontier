@@ -17,11 +17,13 @@ Frontier tracks substantive official publications from the following organizatio
 
 ## Search contract
 
-For a topic such as `long-context agents`, use site-restricted queries such as:
+Use one query per organization. OR-combine the semantic-breadth discovery
+branches inside the organization's approved site restrictions, then batch the
+organization queries into the fewest calls the host supports. For example:
 
 ```text
-site:anthropic.com/research OR site:anthropic.com/engineering "long-context agents"
-site:openai.com/research OR site:openai.com/index "long-context agents"
+(site:anthropic.com/research OR site:anthropic.com/engineering) ("long-context agents" OR "memory-augmented agents" OR "context compression")
+(site:openai.com/research OR site:openai.com/index) ("long-context agents" OR "memory-augmented agents" OR "context compression")
 ```
 
 Search result pages are candidate records. The host agent must inspect selected pages before making a claim.

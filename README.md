@@ -4,9 +4,11 @@ A portable agent skill for tracking recent frontier-AI research and technical ac
 
 Frontier is designed for founders, engineers, investors, researchers, and technical leaders who need to keep their mental models current—not merely collect AI headlines.
 
-## Core value proposition
+## Why
 
 > **Track advances, not headlines.**
+
+AI is advancing rapidly, making it increasingly difficult to keep pace with frontier developments.
 
 Frontier is research-led technical intelligence. It starts with new scholarly research, techniques, evaluations, and findings, then adds official frontier-lab activity to show what is being engineered, released, deployed, and prioritized.
 
@@ -46,10 +48,12 @@ A company publication establishes what an organization claimed or did. It does n
 
 ## Search behavior
 
-For each topic, Frontier searches the three scholarly providers and the Hugging Face Papers attention feed in parallel with host-native searches of approved frontier-lab technical domains. It then:
+For each topic, Frontier generates two or three semantic-breadth discovery branches, searches the scholarly providers with provider-aware concurrency, and filters one shared Hugging Face Papers feed. In parallel, it batches one OR-combined search for each approved frontier lab. It then:
 
 - Filters papers by the requested publication date range
 - Deduplicates paper records by DOI, arXiv ID, Semantic Scholar ID, and conservative title matching
+- Uses the best rank from each scholarly provider without treating repeated query matches as corroboration
+- Runs focused depth searches only when a shortlisted claim lacks baseline, validation, contradiction, or limitation evidence
 - Establishes a prior baseline before claiming novelty when possible
 - Synthesizes related evidence into frontier shifts without merging research and first-party authority
 - Separates momentum from publication date and evidence quality
@@ -61,13 +65,17 @@ The bundled utility performs deterministic scholarly and Hugging Face Papers dis
 
 ```bash
 python3.12 <skill-directory>/scripts/search.py \
-  --query "long-horizon LLM agents" \
+  --query "long-horizon agents" \
+  --query "memory-augmented agents" \
+  --query "context compression" \
   --output /tmp/frontier-results.json
 ```
 
 Use `--help` for additional search and output options.
 
 The utility searches scholarly and momentum sources only. Official company publication discovery remains host-native because those sites have heterogeneous search and page structures.
+
+Progress stays on `stderr`: interactive terminals receive one in-place status line, while captured output receives one compact completion and source-health line. Detailed provider failures remain in the JSON artifact.
 
 Optional environment variables:
 

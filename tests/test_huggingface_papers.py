@@ -54,6 +54,23 @@ class HuggingFacePapersTests(unittest.TestCase):
         self.assertEqual(paper.metadata["huggingface_upvotes"], 12)
 
     @patch("frontier_search.sources.huggingface_papers.request_json_value")
+    def test_reuses_one_feed_payload_across_query_branches(
+        self, request_json_value
+    ) -> None:
+        request_json_value.return_value = []
+        request = SearchRequest(
+            ("robot learning", "embodied intelligence"),
+            date(2026, 1, 1),
+            date(2026, 3, 1),
+        )
+        adapter = HuggingFacePapersAdapter()
+
+        adapter.search("robot learning", request)
+        adapter.search("embodied intelligence", request)
+
+        request_json_value.assert_called_once()
+
+    @patch("frontier_search.sources.huggingface_papers.request_json_value")
     def test_merges_trending_paper_without_counting_it_as_scholarly_provider(
         self, request_json_value
     ) -> None:

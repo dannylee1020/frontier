@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "skills" / "frontier" / "scripts"))
 
-from frontier_search.sources.arxiv import ArxivAdapter  # noqa: E402
+from frontier_search.sources.arxiv import ArxivAdapter, _search_query  # noqa: E402
 from frontier_search.sources.openalex import OpenAlexAdapter  # noqa: E402
 from frontier_search.sources.semantic_scholar import SemanticScholarAdapter  # noqa: E402
 
@@ -31,6 +31,15 @@ class SourceParsingTests(unittest.TestCase):
         self.assertEqual(papers[0].doi, "10.1234/example.1")
         self.assertEqual(papers[0].publication_status, "preprint")
 
+    def test_arxiv_query_uses_conjunctive_terms_not_one_exact_phrase(self) -> None:
+        query = _search_query("physical AI training data")
+
+        self.assertEqual(
+            query,
+            'all:"physical" AND all:"AI" AND all:"training" AND all:"data"',
+        )
+        self.assertNotIn('all:"physical AI training data"', query)
+
     def test_semantic_scholar_parser_handles_missing_abstract(self) -> None:
         payload = json.loads((ROOT / "tests/fixtures/semantic_scholar.json").read_text())
         papers = SemanticScholarAdapter.parse_results(payload["data"], "frontier")
@@ -38,6 +47,9 @@ class SourceParsingTests(unittest.TestCase):
         self.assertEqual(papers[0].semantic_scholar_id, "s2-1")
         self.assertIsNone(papers[1].abstract)
         self.assertEqual(papers[1].publication_status, "unknown")
+
+    def test_semantic_scholar_serializes_query_branches(self) -> None:
+        self.assertEqual(SemanticScholarAdapter.max_concurrency, 1)
 
 
 if __name__ == "__main__":

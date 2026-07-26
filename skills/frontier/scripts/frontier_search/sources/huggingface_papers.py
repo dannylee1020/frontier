@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import threading
 from urllib.parse import urlencode
 
 from ..models import SearchRequest, SearchResponse, SourceRecord
@@ -76,17 +77,32 @@ class HuggingFacePapersAdapter:
     role = "momentum"
     endpoint = "https://huggingface.co/api/daily_papers"
 
+    def __init__(self) -> None:
+        self._payload: list[object] | None = None
+        self._payload_lock = threading.Lock()
+
+    def _load_payload(self, request: SearchRequest) -> list[object]:
+        with self._payload_lock:
+            if self._payload is not None:
+                return self._payload
+            payload = request_json_value(
+                f"{self.endpoint}?{urlencode({'limit': 50})}",
+                headers={"Accept": "application/json"},
+                timeout=request.timeout_seconds,
+                max_retries=request.max_retries,
+            )
+            if not isinstance(payload, list):
+                raise ValueError(
+                    "Hugging Face Papers response did not contain a list"
+                )
+            self._payload = payload
+            return payload
+
     def search(self, query: str, request: SearchRequest) -> SearchResponse:
         # The endpoint currently returns a bounded daily/trending feed. Keep
-        # the query parameter-free and perform topic matching locally.
-        payload = request_json_value(
-            f"{self.endpoint}?{urlencode({'limit': 50})}",
-            headers={"Accept": "application/json"},
-            timeout=request.timeout_seconds,
-            max_retries=request.max_retries,
-        )
-        if not isinstance(payload, list):
-            raise ValueError("Hugging Face Papers response did not contain a list")
+        # the query parameter-free, reuse it across discovery branches, and
+        # perform topic matching locally.
+        payload = self._load_payload(request)
 
         papers: list[SourceRecord] = []
         for feed_rank, item in enumerate(payload, start=1):

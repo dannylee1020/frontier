@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "skills" / "frontier" / "scripts"))
 
 from frontier_search.models import Paper  # noqa: E402
-from frontier_search.rank import rank_papers  # noqa: E402
+from frontier_search.rank import rank_papers, score_paper  # noqa: E402
 
 
 class RankTests(unittest.TestCase):
@@ -35,6 +35,36 @@ class RankTests(unittest.TestCase):
             Paper(title="A", published_at="2026-01-01", sources=["openalex"], source_ranks={"openalex": [1]}),
         ]
         self.assertEqual([p.title for p in rank_papers(papers)], ["A", "B"])
+
+    def test_repeated_queries_from_one_provider_do_not_inflate_fusion(self) -> None:
+        repeated = Paper(
+            title="Repeated",
+            source_ranks={"openalex": [1, 2, 3]},
+        )
+        single = Paper(
+            title="Single",
+            source_ranks={"openalex": [1]},
+        )
+
+        self.assertEqual(score_paper(repeated), score_paper(single))
+
+    def test_cross_branch_coverage_is_a_late_relevance_tiebreaker(self) -> None:
+        broad = Paper(
+            title="Broad",
+            published_at="2026-01-01",
+            sources=["openalex"],
+            source_ranks={"openalex": [1]},
+            matched_queries=["robot learning", "embodied intelligence"],
+        )
+        narrow = Paper(
+            title="Narrow",
+            published_at="2026-01-01",
+            sources=["openalex"],
+            source_ranks={"openalex": [1]},
+            matched_queries=["robot learning"],
+        )
+
+        self.assertEqual(rank_papers([narrow, broad])[0].title, "Broad")
 
 
 if __name__ == "__main__":

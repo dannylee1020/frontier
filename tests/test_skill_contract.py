@@ -82,6 +82,17 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("source failures", SKILL.lower())
         self.assertIn("independently corroborated", ANALYSIS)
 
+    def test_query_fanout_prioritizes_semantic_breadth_then_depth(self) -> None:
+        for branch in (
+            "Precision anchor",
+            "Lexical or ontology expansion",
+            "Adjacent mechanism or application",
+        ):
+            self.assertIn(branch, SKILL)
+        self.assertIn("Do not pad the portfolio with paraphrases", SKILL)
+        self.assertIn("no more than three targeted", SKILL)
+        self.assertIn("are not independent", SKILL)
+
 
 if __name__ == "__main__":
     unittest.main()

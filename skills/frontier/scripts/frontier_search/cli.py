@@ -28,7 +28,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--query",
         action="append",
         required=True,
-        help="Search query; repeat up to three times for query variants.",
+        help="Search query; repeat up to three times for discovery branches.",
     )
     parser.add_argument(
         "--since",

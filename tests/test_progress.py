@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import threading
 import time
 import unittest
 from datetime import date
@@ -47,6 +48,26 @@ class DelayedAdapter:
         )
 
 
+class ConcurrencyTrackingAdapter(DelayedAdapter):
+    max_concurrency = 1
+
+    def __init__(self) -> None:
+        super().__init__("serial", 0.01)
+        self.active = 0
+        self.max_active = 0
+        self.lock = threading.Lock()
+
+    def search(self, query: str, request: SearchRequest) -> SearchResponse:
+        with self.lock:
+            self.active += 1
+            self.max_active = max(self.max_active, self.active)
+        try:
+            return super().search(query, request)
+        finally:
+            with self.lock:
+                self.active -= 1
+
+
 class ProgressTests(unittest.TestCase):
     def setUp(self) -> None:
         self.request = SearchRequest(
@@ -88,7 +109,24 @@ class ProgressTests(unittest.TestCase):
         )
         self.assertEqual(run.counts["returned"], 1)
 
-    def test_plain_renderer_is_append_only_and_provider_scoped(self) -> None:
+    def test_adapter_concurrency_limit_is_respected(self) -> None:
+        adapter = ConcurrencyTrackingAdapter()
+        request = SearchRequest(
+            queries=("anchor", "lexical expansion", "adjacent mechanism"),
+            since=date(2026, 1, 1),
+            until=date(2026, 3, 1),
+        )
+
+        run_search(
+            request,
+            adapters=[adapter],
+            momentum_adapters=[],
+            on_progress=lambda _event: None,
+        )
+
+        self.assertEqual(adapter.max_active, 1)
+
+    def test_plain_renderer_emits_one_quiet_completion_line(self) -> None:
         stream = io.StringIO()
         display = ProgressDisplay(stream)
         display(
@@ -114,6 +152,7 @@ class ProgressTests(unittest.TestCase):
                 source="openalex",
                 role="scholarly",
                 state="completed",
+                query="physical AI",
                 completed=1,
                 total=1,
                 result_count=4,
@@ -131,9 +170,11 @@ class ProgressTests(unittest.TestCase):
         )
 
         output = stream.getvalue()
-        self.assertIn("/frontier · researching physical AI", output)
-        self.assertIn("OpenAlex", output)
-        self.assertIn("Research complete", output)
+        self.assertEqual(len(output.splitlines()), 1)
+        self.assertIn("/frontier · research collected", output)
+        self.assertIn("sources 1 complete", output)
+        self.assertNotIn("physical AI", output)
+        self.assertNotIn("OpenAlex", output)
         self.assertNotIn("\033[", output)
 
     def test_event_serialization_is_json_compatible(self) -> None:

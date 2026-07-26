@@ -11,6 +11,43 @@ from ..transport import request_text
 
 _ATOM = "http://www.w3.org/2005/Atom"
 _ARXIV = "http://arxiv.org/schemas/atom"
+_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "for",
+    "in",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "with",
+}
+
+
+def _search_query(query: str) -> str:
+    """Compile a short discovery branch without exact-matching the whole phrase."""
+
+    terms: list[str] = []
+    seen: set[str] = set()
+    for raw_term in query.split():
+        term = "".join(
+            character
+            for character in raw_term
+            if character.isalnum() or character in {"-", ".", "_", "+"}
+        ).strip("-._+")
+        key = term.casefold()
+        if not term or key in seen:
+            continue
+        seen.add(key)
+        if key not in _STOPWORDS and (len(term) > 1 or not term.isascii()):
+            terms.append(term)
+
+    if not terms:
+        cleaned = query.replace('"', "").strip()
+        return f'all:"{cleaned}"'
+    return " AND ".join(f'all:"{term}"' for term in terms)
 
 
 class ArxivAdapter:
@@ -19,10 +56,8 @@ class ArxivAdapter:
     endpoint = "https://export.arxiv.org/api/query"
 
     def search(self, query: str, request: SearchRequest) -> SearchResponse:
-        # Restrict to all fields while keeping query construction conservative.
-        search_query = f'all:"{query.replace(chr(34), "")}"'
         params = {
-            "search_query": search_query,
+            "search_query": _search_query(query),
             "start": 0,
             "max_results": min(max(request.per_source_limit, 1), 100),
             "sortBy": "submittedDate",
