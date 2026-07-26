@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import sys
 import unittest
@@ -84,10 +86,14 @@ class CliAndPipelineTests(unittest.TestCase):
         statuses = run.to_dict()["source_status"]
         self.assertEqual(statuses["bad"]["status"], "partial")
 
-    def test_help_is_available(self) -> None:
-        with self.assertRaises(SystemExit) as raised:
-            main(["--help"])
+    def test_help_is_available_without_progress_configuration(self) -> None:
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            with self.assertRaises(SystemExit) as raised:
+                main(["--help"])
         self.assertEqual(raised.exception.code, 0)
+        self.assertNotIn("--progress", output.getvalue())
+        self.assertNotIn("--no-progress", output.getvalue())
 
 
 if __name__ == "__main__":

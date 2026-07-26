@@ -38,6 +38,13 @@ Create no more than three focused query variants. Record the exact variants in t
 
 ## Phase 2: collect evidence
 
+The bundled utility automatically shows provider progress while it runs. In an
+interactive terminal this is a compact live display with one row per provider;
+in captured agent output it becomes concise append-only text. This behavior is
+shared by Claude Code, Codex, OpenCode, and Pi and requires no host-specific
+setup. Progress is written to `stderr`, so the JSON artifact on `stdout` or
+`--output` remains machine-readable.
+
 ### Scholarly research evidence
 
 Run the bundled utility:
@@ -57,7 +64,7 @@ The utility concurrently queries:
 - OpenAlex, arXiv, and Semantic Scholar for scholarly papers
 - Hugging Face Papers for the current paper-attention feed
 
-Read the resulting JSON. Check `source_status`, `counts`, `responses`, `momentum_responses`, and `papers` before analysis.
+Read the resulting JSON. Check `source_status`, `counts`, `responses`, `momentum_responses`, and `papers` before analysis. Preserve provider coverage and failure states in the final report; map `ok` to Complete, retain `partial` and `rate-limited`, and use unavailable when a provider has no response. A rate-limited or failed source is incomplete coverage, not zero evidence.
 
 Hugging Face Papers is a global feed, so the utility applies a conservative local topic filter. Its rank, upvotes, and submission date are momentum context only. A paper found only there must be labeled as momentum-discovered and must not be presented as independently corroborated.
 

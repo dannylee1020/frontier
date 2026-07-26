@@ -69,6 +69,12 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("independent evaluation", SAFETY)
         self.assertIn("industry-wide direction", SAFETY)
 
+    def test_provider_coverage_is_part_of_the_default_report(self) -> None:
+        for source in ("OpenAlex", "arXiv", "Semantic Scholar", "Hugging Face Papers"):
+            self.assertIn(source, TEMPLATE)
+        self.assertIn("Research coverage", TEMPLATE)
+        self.assertIn("provider coverage", SKILL.lower())
+
     def test_evidence_safeguards_remain_explicit(self) -> None:
         self.assertIn("prior baseline", SKILL.lower())
         self.assertIn("not established", SKILL)

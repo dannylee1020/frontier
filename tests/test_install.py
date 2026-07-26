@@ -55,6 +55,7 @@ class InstallerTests(unittest.TestCase):
                 "claude": base / "claude" / "frontier",
                 "codex": base / "agents" / "frontier",
                 "opencode": base / "agents" / "frontier",
+                "pi": base / "agents" / "frontier",
             }
             with patch.object(install, "AGENT_DESTINATIONS", destinations):
                 self.assertEqual(install.install(["claude"], dry_run=False), 0)
@@ -68,16 +69,20 @@ class InstallerTests(unittest.TestCase):
                 self.assertEqual(install.uninstall(["claude"]), 0)
                 self.assertFalse(destinations["claude"].exists())
 
-    def test_all_deduplicates_shared_codex_opencode_destination(self) -> None:
+    def test_pi_is_an_explicit_supported_agent(self) -> None:
+        self.assertEqual(install.build_parser().parse_args(["--agent", "pi"]).agent, "pi")
+
+    def test_all_deduplicates_shared_agent_skills_destination(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             shared = Path(directory) / "shared"
             destinations = {
                 "claude": Path(directory) / "claude",
                 "codex": shared,
                 "opencode": shared,
+                "pi": shared,
             }
             with patch.object(install, "AGENT_DESTINATIONS", destinations):
-                self.assertEqual(len(install.destinations(["claude", "codex", "opencode"])), 2)
+                self.assertEqual(len(install.destinations(["claude", "codex", "opencode", "pi"])), 2)
 
 
 if __name__ == "__main__":

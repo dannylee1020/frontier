@@ -23,6 +23,8 @@ Its output is organized around:
 - Claude Code: `/frontier`
 - Codex: `$frontier`
 - OpenCode: native skill activation
+- Pi: native skill activation
+
 
 ## Install
 
@@ -30,7 +32,7 @@ Its output is organized around:
 curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh | sh
 ```
 
-The installer requires `curl`, `tar`, and Python 3.12 or newer. Re-running it replaces existing Frontier installations with the downloaded version.
+The installer requires `curl`, `tar`, and Python 3.12 or newer. Re-running it replaces existing Frontier installations with the downloaded version. Use `--agent pi` for Pi; Pi, Codex, and OpenCode share the Agent Skills destination.
 
 ## Evidence model
 

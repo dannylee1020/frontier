@@ -2,6 +2,15 @@
 
 > As of <date> · covering <window>
 
+### Research coverage
+
+| Source | Role | Status | Results |
+|---|---|---:|---:|
+| OpenAlex | Scholarly | Complete / partial / rate-limited / unavailable | <count> |
+| arXiv | Scholarly | Complete / partial / rate-limited / unavailable | <count> |
+| Semantic Scholar | Scholarly | Complete / partial / rate-limited / unavailable | <count> |
+| Hugging Face Papers | Momentum | Complete / partial / rate-limited / unavailable | <count> |
+
 ## Bottom Line
 
 <!-- State the most important update to the reader's mental model in two or three sentences. -->
