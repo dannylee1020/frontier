@@ -10,11 +10,14 @@ A `frontier_move` is a synthesis layer, not a source class. It may connect evide
 
 ## Scholarly research
 
-Canonical scholarly providers:
+Default scholarly providers:
 
 - **OpenAlex:** broad scholarly discovery and publication metadata.
 - **arXiv:** recent preprints, especially in computer science, mathematics, physics, and AI.
-- **Semantic Scholar:** discovery, abstracts, related metadata, open-access links, and citation signals.
+
+Optional scholarly provider:
+
+- **Semantic Scholar:** authenticated discovery, abstracts, related metadata, open-access links, and citation signals. Enable it only by setting `SEMANTIC_SCHOLAR_API_KEY`; omit it from collection and coverage when unconfigured.
 
 Hugging Face Papers is a momentum overlay for papers. Its rank, upvotes, and feed submission date do not establish technical quality, novelty, or scholarly corroboration. Preserve the paper's publication date separately from `momentum_observed_at`.
 
@@ -47,7 +50,7 @@ Exclude funding, hiring, generic partnerships, generic thought leadership, promo
 
 ## Source status
 
-The report must distinguish `ok`, `partial`, `rate-limited`, `unavailable`, and `error` for each provider or evidence lane. Paper status must distinguish `published`, `preprint`, `submitted`, `corrected`, `retracted`, and `unknown` whenever records support it.
+The report must distinguish `ok`, `partial`, `rate-limited`, `unavailable`, and `error` for each enabled provider or evidence lane. An unconfigured optional provider is omitted rather than marked unavailable. Paper status must distinguish `published`, `preprint`, `submitted`, `corrected`, `retracted`, and `unknown` whenever records support it.
 
 ## Partial results
 

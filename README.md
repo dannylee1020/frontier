@@ -40,7 +40,7 @@ The installer requires `curl`, `tar`, and Python 3.12 or newer. Re-running it re
 
 Frontier combines three evidence classes without collapsing their meaning:
 
-- Scholarly research from OpenAlex, arXiv, and Semantic Scholar drives technical understanding.
+- Scholarly research from OpenAlex and arXiv drives technical understanding. Semantic Scholar can supplement discovery when authenticated access is configured.
 - Official frontier-lab publications reveal first-party research, engineering practice, capability releases, infrastructure investment, evaluations, and organizational direction.
 - Hugging Face Papers provides a paper-attention overlay only; rank and upvotes are momentum context, not scientific validation.
 
@@ -48,7 +48,7 @@ A company publication establishes what an organization claimed or did. It does n
 
 ## Search behavior
 
-For each topic, Frontier generates two or three semantic-breadth discovery branches, searches the scholarly providers with provider-aware concurrency, and filters one shared Hugging Face Papers feed. In parallel, it batches one OR-combined search for each approved frontier lab. It then:
+For each topic, Frontier generates two or three semantic-breadth discovery branches, searches the configured scholarly providers with provider-aware concurrency, and filters one shared Hugging Face Papers feed. OpenAlex and arXiv are enabled by default; Semantic Scholar joins the search only when `SEMANTIC_SCHOLAR_API_KEY` is set. In parallel, Frontier batches one OR-combined search for each approved frontier lab. It then:
 
 - Filters papers by the requested publication date range
 - Deduplicates paper records by DOI, arXiv ID, Semantic Scholar ID, and conservative title matching
@@ -79,6 +79,6 @@ Progress stays on `stderr`: interactive terminals receive one in-place status li
 
 Optional environment variables:
 
-- `SEMANTIC_SCHOLAR_API_KEY` — improve Semantic Scholar access
+- `SEMANTIC_SCHOLAR_API_KEY` — enable optional Semantic Scholar discovery
 - `OPENALEX_EMAIL` — use the OpenAlex polite pool
 - `FRONTIER_USER_AGENT` — customize the request user agent

@@ -70,10 +70,16 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("industry-wide direction", SAFETY)
 
     def test_provider_coverage_is_part_of_the_default_report(self) -> None:
-        for source in ("OpenAlex", "arXiv", "Semantic Scholar", "Hugging Face Papers"):
+        for source in ("OpenAlex", "arXiv", "Hugging Face Papers"):
             self.assertIn(source, TEMPLATE)
         self.assertIn("Research coverage", TEMPLATE)
         self.assertIn("provider coverage", SKILL.lower())
+        self.assertIn("When SEMANTIC_SCHOLAR_API_KEY is configured", TEMPLATE)
+        self.assertIn(
+            "Use Semantic Scholar only when `SEMANTIC_SCHOLAR_API_KEY` is configured",
+            SKILL,
+        )
+        self.assertIn("An unconfigured optional provider is omitted", SKILL)
 
     def test_evidence_safeguards_remain_explicit(self) -> None:
         self.assertIn("prior baseline", SKILL.lower())

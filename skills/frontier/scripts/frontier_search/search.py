@@ -23,9 +23,12 @@ from .sources.base import SourceAdapter, timed_search
 
 
 def default_adapters() -> list[SourceAdapter]:
-    """Return the three canonical scholarly search providers."""
+    """Return the configured scholarly search providers."""
 
-    return [OpenAlexAdapter(), ArxivAdapter(), SemanticScholarAdapter()]
+    adapters: list[SourceAdapter] = [OpenAlexAdapter(), ArxivAdapter()]
+    if SemanticScholarAdapter.is_configured():
+        adapters.append(SemanticScholarAdapter())
+    return adapters
 
 
 def default_momentum_adapters() -> list[SourceAdapter]:

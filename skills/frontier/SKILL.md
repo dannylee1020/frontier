@@ -16,7 +16,8 @@ Use this skill when the user wants to understand recent technical advances in fr
 - Treat scholarly research as the primary driver of technical insight.
 - Use official frontier-lab publications to understand engineering practice, deployed capabilities, infrastructure investment, and organizational direction.
 - Preserve separate evidence semantics for research, first-party company claims, external validation, adoption, and attention.
-- Use OpenAlex, arXiv, and Semantic Scholar as the three canonical scholarly providers.
+- Use OpenAlex and arXiv as the default scholarly providers.
+- Use Semantic Scholar only when `SEMANTIC_SCHOLAR_API_KEY` is configured. Without a key, omit it from collection and coverage rather than reporting a provider failure.
 - Use Hugging Face Papers only as a momentum overlay for papers; it is not an independent scholarly validator.
 - Search official company technical publications with the host's native web-search capability using [company-sources.md](references/company-sources.md).
 - Establish a prior baseline before claiming that a technique or finding is novel or that the landscape shifted. Say `not established` when the baseline cannot be supported.
@@ -48,7 +49,7 @@ Keep visible progress to three stage-level updates:
 
 ```text
 /frontier · framing · <topic> · <window> · <N> discovery angles
-/frontier · collecting · 4 research sources · 10 labs
+/frontier · collecting · <source count> research sources · 10 labs
 /frontier · synthesizing · <paper count> papers · <lab count> lab records
 ```
 
@@ -77,10 +78,11 @@ python3.12 <skill-directory>/scripts/search.py \
 
 The utility searches:
 
-- OpenAlex, arXiv, and Semantic Scholar for scholarly papers
+- OpenAlex and arXiv for scholarly papers
+- Semantic Scholar for additional scholarly discovery only when `SEMANTIC_SCHOLAR_API_KEY` is configured
 - Hugging Face Papers for the current paper-attention feed
 
-Read the resulting JSON. Check `source_status`, `counts`, `responses`, `momentum_responses`, and `papers` before analysis. Preserve provider coverage and failure states in the final report; map `ok` to Complete, retain `partial` and `rate-limited`, and use unavailable when a provider has no response. A rate-limited or failed source is incomplete coverage, not zero evidence.
+Read the resulting JSON. Check `source_status`, `counts`, `responses`, `momentum_responses`, and `papers` before analysis. Preserve provider coverage and failure states in the final report; map `ok` to Complete, retain `partial` and `rate-limited`, and use unavailable when an enabled provider has no response. An unconfigured optional provider is omitted, not failed coverage. A rate-limited or failed enabled source is incomplete coverage, not zero evidence.
 
 Hugging Face Papers is a global feed, so the utility applies a conservative local topic filter. Its rank, upvotes, and submission date are momentum context only. A paper found only there must be labeled as momentum-discovered and must not be presented as independently corroborated.
 
@@ -146,7 +148,7 @@ Keep these states distinct:
 
 - `published`, `preprint`, `submitted`, `corrected`, `retracted`, or `unknown`
 - `metadata-only`, `abstract-level`, or `full-text`
-- `momentum-discovered` when no canonical scholarly provider returned the paper
+- `momentum-discovered` when no enabled scholarly provider returned the paper
 - `trending-on-huggingface` when a matching momentum record exists
 
 ### Company records

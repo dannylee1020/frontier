@@ -3,17 +3,19 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import sys
 import unittest
 from datetime import date
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "skills" / "frontier" / "scripts"))
 
 from frontier_search.cli import main  # noqa: E402
 from frontier_search.models import SearchRequest, SearchResponse, SourceRecord  # noqa: E402
-from frontier_search.search import run_search  # noqa: E402
+from frontier_search.search import default_adapters, run_search  # noqa: E402
 
 
 class FakeAdapter:
@@ -49,6 +51,18 @@ class FakeAdapter:
 
 
 class CliAndPipelineTests(unittest.TestCase):
+    def test_default_adapters_omit_unconfigured_semantic_scholar(self) -> None:
+        with patch.dict(os.environ, {"SEMANTIC_SCHOLAR_API_KEY": "   "}):
+            names = [adapter.name for adapter in default_adapters()]
+
+        self.assertEqual(names, ["openalex", "arxiv"])
+
+    def test_default_adapters_include_configured_semantic_scholar(self) -> None:
+        with patch.dict(os.environ, {"SEMANTIC_SCHOLAR_API_KEY": "test-key"}):
+            names = [adapter.name for adapter in default_adapters()]
+
+        self.assertEqual(names, ["openalex", "arxiv", "semantic_scholar"])
+
     def test_pipeline_filters_old_records_and_survives_provider_failure(self) -> None:
         records = [
             SourceRecord(

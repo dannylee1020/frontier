@@ -20,7 +20,23 @@ class SemanticScholarAdapter:
         "openAccessPdf,fieldsOfStudy,isOpenAccess,publicationTypes"
     )
 
+    @staticmethod
+    def is_configured() -> bool:
+        """Return whether authenticated Semantic Scholar access is configured."""
+
+        return bool(os.environ.get("SEMANTIC_SCHOLAR_API_KEY", "").strip())
+
+    @staticmethod
+    def _api_key() -> str:
+        api_key = os.environ.get("SEMANTIC_SCHOLAR_API_KEY", "").strip()
+        if not api_key:
+            raise RuntimeError(
+                "SEMANTIC_SCHOLAR_API_KEY is required to use Semantic Scholar"
+            )
+        return api_key
+
     def search(self, query: str, request: SearchRequest) -> SearchResponse:
+        api_key = self._api_key()
         params = {
             "query": query,
             "limit": min(max(request.per_source_limit, 1), 100),
@@ -29,13 +45,9 @@ class SemanticScholarAdapter:
             "year": f"{request.since.year}-{request.until.year}",
         }
         url = f"{self.endpoint}?{urlencode(params)}"
-        headers: dict[str, str] = {}
-        api_key = os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
-        if api_key:
-            headers["x-api-key"] = api_key
         payload = request_json(
             url,
-            headers=headers,
+            headers={"x-api-key": api_key},
             timeout=request.timeout_seconds,
             max_retries=request.max_retries,
         )

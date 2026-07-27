@@ -34,7 +34,7 @@ Hugging Face momentum labels:
 
 - `not_observed`
 - `trending-on-huggingface`
-- `momentum-discovered`: found through the momentum feed but not returned by a canonical scholarly provider.
+- `momentum-discovered`: found through the momentum feed but not returned by an enabled scholarly provider.
 
 Momentum is attention context, not evidence quality or independent corroboration.
 

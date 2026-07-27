@@ -8,8 +8,11 @@
 |---|---|---:|---:|
 | OpenAlex | Scholarly | Complete / partial / rate-limited / unavailable | <count> |
 | arXiv | Scholarly | Complete / partial / rate-limited / unavailable | <count> |
-| Semantic Scholar | Scholarly | Complete / partial / rate-limited / unavailable | <count> |
 | Hugging Face Papers | Momentum | Complete / partial / rate-limited / unavailable | <count> |
+
+<!-- When SEMANTIC_SCHOLAR_API_KEY is configured, include:
+| Semantic Scholar | Scholarly (optional) | Complete / partial / rate-limited / unavailable | <count> |
+-->
 
 ## Bottom Line
 
