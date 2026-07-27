@@ -1,75 +1,85 @@
 # Synthesis report contracts
 
-Frontier reports are organized around material changes to the AI frontier. Research papers and official lab publications remain distinct evidence classes underneath the synthesis; they are not mandatory top-level report lanes.
+Frontier reports explain what changed in plain language. Research papers and official lab publications remain distinct evidence classes underneath the synthesis; they are not mandatory top-level report lanes.
 
 ## Default brief
 
-The default output is a concise briefing with this structure:
+The default output is a one-page technical note:
 
 ```markdown
-# Frontier Brief: <topic>
+# <Topic>
 
-> As of <date> · covering <window>
+> <date window> · <paper count> papers and <lab-post count> lab posts cited
 
-## Bottom Line
-## Frontier Shifts
-## New Techniques and Findings
-## Lab and Deployment Moves
-## Landscape Direction
-## Implications
-## Watchlist and Caveats
+## The short version
+## What changed
+## Also worth knowing
+## What to watch
+## Sources and limits
 ```
 
-### Frontier Shifts
+Read [writing-style.md](writing-style.md) before drafting.
 
-Include at most three principal shifts. Each shift should state:
+### The short version
 
-- Previous baseline
-- What changed
-- Supporting evidence and evidence maturity
-- Confidence
-- Why the change matters
+Use two or three sentences. State the main change, what did not change when relevant, and the strongest qualification. Start with the finding; do not describe the report or search process.
 
-Do not describe an isolated company announcement as an industry shift. Use `not established` when the prior baseline or landscape effect cannot be supported.
+### What changed
 
-### New Techniques and Findings
+Include at most three supported changes, ordered by importance. Do not force three. If no candidate clears the evidence threshold, say so plainly.
 
-Include at most five research-led items. Explain the novel contribution, evaluation, readiness, limitations, and why it matters. Label papers as published, preprint, abstract-level, full-text, or otherwise appropriate.
+Each change must include:
 
-### Lab and Deployment Moves
+- A plain title stating the change
+- The supported previous baseline, or `not established`
+- What the new evidence shows
+- A direct technical or practical consequence, when established
+- Supporting links, evidence type, evidence maturity, and confidence
+- The strongest material caveat, contradiction, or unknown
 
-Include at most three substantive company or lab moves. These may include research, engineering, capability releases, infrastructure, evaluations, or strategic signals. Attribute first-party claims explicitly and state the degree of external validation.
+Do not describe an isolated company announcement as a broader shift.
 
-### Landscape Direction
+### Also worth knowing
 
-Summarize convergence, divergence, and strengthening or weakening research and deployment directions. Distinguish a repeated organizational bet from an industry-wide shift.
+Include at most five compact items that matter but do not qualify as principal changes. Use only applicable labels:
 
-### Implications
+- `Research` for a paper finding or technique
+- `Deployment` for a concrete lab or engineering move
+- `Counter-signal` for evidence that weakens a likely conclusion
 
-When the audience is not specified, provide compact implications for:
+Attribute first-party statements and preserve publication status, readiness, evidence level, and external-validation limits in the sentence.
 
-- Engineers
-- Founders
-- Investors
+### What this changes
 
-Tailor the section to the requested persona when known. Do not turn technical evidence into unsupported market forecasts.
+This section is conditional. Include one to three direct implications only when the requested audience benefits from separate guidance. Do not emit default Engineer, Founder, and Investor blocks.
 
-### Watchlist and caveats
+### What to watch
 
-Include material limitations, contradictions, unknowns, source failures, unvalidated claims, and developments worth monitoring.
+Include at most three specific unresolved questions, evaluations, or developments that could change the current conclusion. Do not use this section as a second caveat list.
+
+### Sources and limits
+
+Keep the brief standalone with a compact footer:
+
+- Count only papers and lab posts actually cited by the brief.
+- Name enabled paper indexes, the momentum feed, and lab-site coverage.
+- Disclose material failed, partial, rate-limited, or unavailable lanes.
+- Omit unconfigured optional providers.
 
 Brief rules:
 
 - Lead with conclusions, not search methodology.
+- Follow [writing-style.md](writing-style.md).
 - Keep research evidence, company authority, external validation, adoption, and attention distinguishable.
 - Include only the most useful supporting links.
 - Treat Hugging Face ranking and upvotes as momentum context only.
 - Say when an evidence class or source lane was unavailable; do not imply an unavailable lane had no results.
-- Do not include candidate counts, query variants, or full comparison tables.
+- Do not include query variants, full comparison tables, or uncited candidate counts.
+- Keep the visible brief bounded: three principal changes, five other items, three watch items, and three audience implications when that conditional section is needed.
 
 ## Deep report
 
-Use this format only when the user asks for more detail:
+Use this format only when the user asks for more detail. Deep mode may retain the established research and company lanes:
 
 ```markdown
 # Frontier AI: <topic>

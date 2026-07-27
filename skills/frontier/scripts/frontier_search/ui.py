@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections import Counter
 import os
 import sys
 import threading
@@ -22,19 +21,26 @@ class Colors:
 
 
 SPINNER_FRAMES = ("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
+SOURCE_LABELS = {
+    "openalex": "OpenAlex",
+    "arxiv": "arXiv",
+    "semantic_scholar": "Semantic Scholar",
+    "huggingface_papers": "Hugging Face Papers",
+}
 
 
 @dataclass
 class _ProviderState:
     source: str
     state: str = "queued"
+    result_count: int = 0
 
 
 class ProgressDisplay:
-    """Render one quiet status line with automatic TTY/plain-text selection.
+    """Render quiet live status followed by a compact search receipt.
 
     Detailed provider lifecycle events remain available to structured sinks.
-    Human output deliberately omits query text, provider rows, and raw errors.
+    Human output deliberately omits query text and raw errors.
     """
 
     def __init__(self, stream=None) -> None:
@@ -44,7 +50,7 @@ class ProgressDisplay:
         self._rows: dict[str, _ProviderState] = {}
         self._started_at = time.monotonic()
         self._frame = 0
-        self._phase = "collecting research sources"
+        self._phase = "searching"
         self._lock = threading.RLock()
         self._running = False
         self._spinner_thread: threading.Thread | None = None
@@ -74,10 +80,21 @@ class ProgressDisplay:
 
     def _status_line(self) -> str:
         frame = SPINNER_FRAMES[self._frame % len(SPINNER_FRAMES)]
+        details: list[str] = [self._phase]
+        if self._rows:
+            matches = sum(row.result_count for row in self._rows.values())
+            finished = sum(
+                row.state not in {"queued", "running"}
+                for row in self._rows.values()
+            )
+            if matches:
+                details.append(f"{matches} matches")
+            if finished:
+                details.append(f"{finished}/{len(self._rows)} sources")
         return (
             f"{self._style(Colors.CYAN, frame)} "
             f"{self._style(Colors.CYAN, '/frontier')} · "
-            f"{self._style(Colors.DIM, self._phase)}"
+            f"{self._style(Colors.DIM, ' · '.join(details))}"
         )
 
     def _draw_live(self, message: str | None = None) -> None:
@@ -108,28 +125,65 @@ class ProgressDisplay:
     def _plain(self, text: str) -> None:
         self._write(f"{text}\n")
 
-    def _source_health(self) -> str:
-        counts = Counter(row.state for row in self._rows.values())
-        labels = (
-            ("completed", "complete"),
-            ("partial", "partial"),
-            ("rate-limited", "rate-limited"),
-            ("failed", "failed"),
-            ("cancelled", "cancelled"),
+    @staticmethod
+    def _plural(count: int, singular: str, plural: str | None = None) -> str:
+        return singular if count == 1 else (plural or f"{singular}s")
+
+    def _receipt(self, counts: dict[str, int]) -> str:
+        rows: list[str] = []
+        for row in self._rows.values():
+            label = SOURCE_LABELS.get(
+                row.source,
+                row.source.replace("_", " ").title(),
+            )
+            noun = self._plural(row.result_count, "match", "matches")
+            status = "" if row.state == "completed" else f" · {row.state}"
+            rows.append(f"{label:<20} {row.result_count:>3} {noun}{status}")
+
+        unique = counts.get("deduplicated", 0)
+        returned = counts.get("returned", 0)
+        unique_noun = self._plural(unique, "paper")
+        shortlist_noun = self._plural(returned, "paper")
+        rows.extend(
+            (
+                f"{'Unique in window':<20} {unique:>3} {unique_noun}",
+                f"{'Shortlisted':<20} {returned:>3} {shortlist_noun}",
+            )
         )
-        parts = [
-            f"{counts[state]} {label}"
-            for state, label in labels
-            if counts[state]
+
+        rendered_rows = [
+            f"{'└─' if index == len(rows) - 1 else '├─'} {row}"
+            for index, row in enumerate(rows)
         ]
-        return f"sources {', '.join(parts)}" if parts else "sources unavailable"
+        header = (
+            f"{self._style(Colors.GREEN, '✓')} "
+            f"{self._style(Colors.CYAN, '/frontier')} · paper search complete"
+        )
+        return "\n".join((header, *rendered_rows))
 
     def handle(self, event: ProgressEvent) -> None:
         with self._lock:
             if event.name == "run_started":
                 self._rows.clear()
                 self._started_at = time.monotonic()
-                self._phase = "collecting research sources"
+                angles = event.counts.get("queries", 0)
+                scholarly = event.counts.get("scholarly_providers", 0)
+                momentum = event.counts.get("momentum_providers", 0)
+                parts: list[str] = []
+                if angles:
+                    parts.append(
+                        f"searching {angles} {self._plural(angles, 'angle')}"
+                    )
+                if scholarly:
+                    parts.append(
+                        f"{scholarly} paper "
+                        f"{self._plural(scholarly, 'index', 'indexes')}"
+                    )
+                if momentum:
+                    parts.append(
+                        f"{momentum} momentum {self._plural(momentum, 'feed')}"
+                    )
+                self._phase = " · ".join(parts) or "searching"
                 if self._interactive:
                     self._start_spinner()
                     self._draw_live()
@@ -141,6 +195,7 @@ class ProgressDisplay:
                     _ProviderState(source=event.source),
                 )
                 row.state = event.state or row.state
+                row.result_count = event.result_count
 
             if event.name in {
                 "provider_started",
@@ -150,26 +205,15 @@ class ProgressDisplay:
                 if self._interactive:
                     self._draw_live()
             elif event.name == "processing_started":
-                self._phase = "processing and ranking"
+                matches = sum(row.result_count for row in self._rows.values())
+                self._phase = f"deduplicating and ranking {matches} matches"
                 if self._interactive:
                     self._draw_live()
             elif event.name == "run_finished":
                 self._stop_spinner()
-                returned = event.counts.get("returned", event.result_count)
-                date_filtered = event.counts.get("date_filtered")
-                count_text = f"{returned} papers"
-                if date_filtered is not None and date_filtered != returned:
-                    count_text = f"{date_filtered} papers · {returned} returned"
-                message = (
-                    f"{self._style(Colors.GREEN, '✓')} "
-                    f"{self._style(Colors.CYAN, '/frontier')} · "
-                    f"research collected · {count_text} · {self._source_health()}"
-                )
                 if self._interactive:
-                    self._draw_live(message)
-                    self._write("\n")
-                else:
-                    self._plain(message)
+                    self._write("\r\033[2K")
+                self._plain(self._receipt(event.counts))
             elif event.name == "run_cancelled":
                 self._stop_spinner()
                 message = "- /frontier · research cancelled"

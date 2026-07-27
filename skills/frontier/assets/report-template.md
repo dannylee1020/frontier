@@ -1,73 +1,48 @@
-# Frontier Brief: <topic>
+# <Topic>
 
-> As of <date> · covering <window>
+> <date window> · <paper count> papers and <lab-post count> lab posts cited
 
-### Research coverage
+## The short version
 
-| Source | Role | Status | Results |
-|---|---|---:|---:|
-| OpenAlex | Scholarly | Complete / partial / rate-limited / unavailable | <count> |
-| arXiv | Scholarly | Complete / partial / rate-limited / unavailable | <count> |
-| Hugging Face Papers | Momentum | Complete / partial / rate-limited / unavailable | <count> |
+<!-- State what changed, what did not, and the most important qualification in two or three sentences. Start with the finding. -->
 
-<!-- When SEMANTIC_SCHOLAR_API_KEY is configured, include:
-| Semantic Scholar | Scholarly (optional) | Complete / partial / rate-limited / unavailable | <count> |
+## What changed
+
+### 1. <Plain statement of the change>
+
+<What was true before and what the new evidence shows.>
+
+**Why it matters:** <Direct technical or practical consequence.>
+
+**Evidence:** <Evidence type and maturity> · <confidence> · [sources]
+
+**Caveat:** <Strongest material limitation, contradiction, or unknown.>
+
+<!-- Include no more than three supported changes. Do not force three. If no change clears the evidence threshold, say so plainly. -->
+
+## Also worth knowing
+
+- **Research:** <Useful finding that does not establish a broader change.> [source]
+- **Deployment:** <Concrete lab or engineering move, attributed as first-party.> [source]
+- **Counter-signal:** <Evidence that weakens an otherwise tempting conclusion.> [source]
+
+<!-- Include no more than five items. Use only the labels that fit. -->
+
+<!-- Include this section only when the requested audience needs separate implications:
+## What this changes
+
+- <One direct, audience-specific consequence.>
 -->
 
-## Bottom Line
+## What to watch
 
-<!-- State the most important update to the reader's mental model in two or three sentences. -->
+- <Specific unresolved question, evaluation, or result that could change the current conclusion.>
+- <Specific development worth checking next.>
 
-## Frontier Shifts
+<!-- Include no more than three items. -->
 
-### <Material landscape change>
+## Sources and limits
 
-- **Previous baseline:** What was established before, or `not established`.
-- **What changed:** The new capability, technique, finding, or direction.
-- **Evidence:** Research / engineering / release / evaluation / strategic signal.
-- **Confidence:** High / medium / low.
-- **Why it matters:** Technical and practical significance.
+**Coverage:** <Enabled paper indexes and momentum feed> · <lab sites checked>
 
-<!-- Include no more than three shifts. Do not call an isolated company announcement an industry shift. -->
-
-## New Techniques and Findings
-
-### <Novel technique or finding>
-
-What is new relative to prior work, what was evaluated, and why it matters.
-
-- **Type:** Research advance / engineering advance / evaluation finding
-- **Evidence:** Published / preprint / abstract-level / full-text
-- **Readiness:** Exploratory / reproducible / deployed / unknown
-- **Sources:** [paper or technical source]
-
-<!-- Include no more than five items. -->
-
-## Lab and Deployment Moves
-
-### <Material company or lab move>
-
-What the organization reported, released, implemented, or prioritized, and what direction it may signal.
-
-- **Type:** Capability release / infrastructure move / strategic signal / engineering advance
-- **Authority:** First-party claim or action
-- **External validation:** Available / limited / none
-- **Sources:** [official publication]
-
-<!-- Include no more than three items. A company move is not automatically an industry trend. -->
-
-## Landscape Direction
-
-<!-- Explain convergence, divergence, and which directions appear to be strengthening. -->
-
-## Implications
-
-- **Engineers:** What may become buildable, reproducible, or production-relevant?
-- **Founders:** What capability, cost curve, workflow, or product assumption may change?
-- **Investors:** What technical direction, market structure, or timeline may deserve attention?
-
-<!-- Tailor these to the requested audience when known. -->
-
-## Watchlist and Caveats
-
-<!-- Include unresolved claims, weak evidence, contradictions, source failures, and developments worth monitoring. -->
+**Limits:** <Material source failures, unavailable evidence, and scope limits>

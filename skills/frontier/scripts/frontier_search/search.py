@@ -98,7 +98,17 @@ def _run_task_groups(
             topic=" / ".join(queries),
             completed=0,
             total=len(tasks),
-            counts={"providers": len(providers), "queries": len(tasks)},
+            counts={
+                "providers": len(providers),
+                "queries": len(queries),
+                "tasks": len(tasks),
+                "scholarly_providers": sum(
+                    1 for role, _total in providers.values() if role == "scholarly"
+                ),
+                "momentum_providers": sum(
+                    1 for role, _total in providers.values() if role == "momentum"
+                ),
+            },
         ),
     )
     for source, (role, total) in providers.items():

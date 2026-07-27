@@ -8,6 +8,7 @@ from datetime import date
 
 from pathlib import Path
 import sys
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "skills" / "frontier" / "scripts"))
@@ -68,6 +69,11 @@ class ConcurrencyTrackingAdapter(DelayedAdapter):
                 self.active -= 1
 
 
+class InteractiveStream(io.StringIO):
+    def isatty(self) -> bool:
+        return True
+
+
 class ProgressTests(unittest.TestCase):
     def setUp(self) -> None:
         self.request = SearchRequest(
@@ -95,6 +101,16 @@ class ProgressTests(unittest.TestCase):
         ]
         self.assertEqual(finished, ["fast", "slow"])
         self.assertEqual(events[0].name, "run_started")
+        self.assertEqual(
+            events[0].counts,
+            {
+                "providers": 2,
+                "queries": 1,
+                "tasks": 2,
+                "scholarly_providers": 2,
+                "momentum_providers": 0,
+            },
+        )
         self.assertEqual(events[-1].name, "run_finished")
 
     def test_renderer_failures_do_not_break_search(self) -> None:
@@ -126,7 +142,7 @@ class ProgressTests(unittest.TestCase):
 
         self.assertEqual(adapter.max_active, 1)
 
-    def test_plain_renderer_emits_one_quiet_completion_line(self) -> None:
+    def test_plain_renderer_emits_compact_search_receipt(self) -> None:
         stream = io.StringIO()
         display = ProgressDisplay(stream)
         display(
@@ -134,7 +150,13 @@ class ProgressTests(unittest.TestCase):
                 name="run_started",
                 topic="physical AI",
                 total=2,
-                counts={"providers": 2},
+                counts={
+                    "providers": 1,
+                    "queries": 1,
+                    "tasks": 1,
+                    "scholarly_providers": 1,
+                    "momentum_providers": 0,
+                },
             )
         )
         display(
@@ -164,18 +186,99 @@ class ProgressTests(unittest.TestCase):
                 name="run_finished",
                 state="completed",
                 result_count=4,
-                counts={"date_filtered": 4, "returned": 4},
+                counts={"deduplicated": 4, "returned": 4},
                 elapsed_ms=250,
             )
         )
 
         output = stream.getvalue()
-        self.assertEqual(len(output.splitlines()), 1)
-        self.assertIn("/frontier · research collected", output)
-        self.assertIn("sources 1 complete", output)
+        self.assertEqual(len(output.splitlines()), 4)
+        self.assertIn("/frontier · paper search complete", output)
+        self.assertIn("OpenAlex", output)
+        self.assertIn("4 matches", output)
+        self.assertIn("Unique in window", output)
+        self.assertIn("Shortlisted", output)
         self.assertNotIn("physical AI", output)
-        self.assertNotIn("OpenAlex", output)
         self.assertNotIn("\033[", output)
+
+    def test_receipt_discloses_source_state_without_raw_error(self) -> None:
+        stream = io.StringIO()
+        display = ProgressDisplay(stream)
+        display(
+            ProgressEvent(
+                name="run_started",
+                counts={
+                    "providers": 1,
+                    "queries": 2,
+                    "tasks": 2,
+                    "scholarly_providers": 1,
+                    "momentum_providers": 0,
+                },
+            )
+        )
+        display(
+            ProgressEvent(
+                name="provider_finished",
+                source="arxiv",
+                role="scholarly",
+                state="rate-limited",
+                result_count=0,
+                error="private provider error",
+            )
+        )
+        display(
+            ProgressEvent(
+                name="run_finished",
+                state="completed",
+                counts={"deduplicated": 0, "returned": 0},
+            )
+        )
+
+        output = stream.getvalue()
+        self.assertIn("arXiv", output)
+        self.assertIn("rate-limited", output)
+        self.assertNotIn("private provider error", output)
+
+    def test_interactive_renderer_replaces_status_with_receipt(self) -> None:
+        stream = InteractiveStream()
+        display = ProgressDisplay(stream)
+        with patch.object(display, "_start_spinner"):
+            display(
+                ProgressEvent(
+                    name="run_started",
+                    topic="private query",
+                    counts={
+                        "providers": 1,
+                        "queries": 3,
+                        "tasks": 3,
+                        "scholarly_providers": 1,
+                        "momentum_providers": 0,
+                    },
+                )
+            )
+            display(
+                ProgressEvent(
+                    name="provider_finished",
+                    source="openalex",
+                    role="scholarly",
+                    state="completed",
+                    result_count=7,
+                )
+            )
+            display(
+                ProgressEvent(
+                    name="run_finished",
+                    state="completed",
+                    counts={"deduplicated": 5, "returned": 3},
+                )
+            )
+
+        receipt = stream.getvalue().rsplit("\r\033[2K", maxsplit=1)[-1]
+        self.assertIn("/frontier", receipt)
+        self.assertIn("OpenAlex", receipt)
+        self.assertIn("7 matches", receipt)
+        self.assertIn("Unique in window", receipt)
+        self.assertNotIn("private query", receipt)
 
     def test_event_serialization_is_json_compatible(self) -> None:
         event = ProgressEvent(
