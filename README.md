@@ -23,7 +23,13 @@ The default report is kept to one page:
 
 ## Install
 
-Ask your coding agent to install Frontier using its normal skill-installation workflow. Frontier requires Python 3.12 or newer.
+Install Frontier directly with curl:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh | sh
+```
+
+Frontier requires Python 3.12 or newer.
 
 ## How the research works
 
