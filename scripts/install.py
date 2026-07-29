@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -29,6 +30,11 @@ def source_dir() -> Path:
     return project_root() / "skills" / "frontier"
 
 
+def frontier_home() -> Path:
+    override = os.environ.get("FRONTIER_HOME", "").strip()
+    return Path(override).expanduser() if override else Path.home() / ".frontier"
+
+
 def destinations(agents: Iterable[str]) -> list[tuple[str, Path]]:
     result: list[tuple[str, Path]] = []
     seen: set[Path] = set()
@@ -51,6 +57,18 @@ def install(agents: Iterable[str], *, force: bool = False, dry_run: bool = False
     if not source.is_dir():
         print(f"source skill not found: {source}", file=sys.stderr)
         return 1
+    configuration_home = frontier_home()
+    if dry_run:
+        print(f"would create configuration directory: {configuration_home}")
+    else:
+        try:
+            configuration_home.mkdir(mode=0o700, parents=True, exist_ok=True)
+        except OSError as error:
+            print(
+                f"could not create configuration directory {configuration_home}: {error}",
+                file=sys.stderr,
+            )
+            return 1
     for agent, destination in destinations(agents):
         action = "would install" if dry_run else "installing"
         print(f"{action} {agent}: {source} -> {destination}")

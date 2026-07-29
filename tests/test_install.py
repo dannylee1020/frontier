@@ -34,6 +34,7 @@ class InstallerTests(unittest.TestCase):
             environment.update(
                 {
                     "HOME": str(home),
+                    "FRONTIER_HOME": "",
                     "FRONTIER_ARCHIVE_URL": archive.as_uri(),
                     "TMPDIR": str(base),
                 }
@@ -46,6 +47,8 @@ class InstallerTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((home / ".frontier").is_dir())
+            self.assertEqual((home / ".frontier").stat().st_mode & 0o777, 0o700)
             self.assertTrue((home / ".claude" / "skills" / "frontier" / "SKILL.md").is_file())
 
     def test_installs_and_uninstalls_to_runtime_targets(self) -> None:
@@ -57,8 +60,11 @@ class InstallerTests(unittest.TestCase):
                 "opencode": base / "agents" / "frontier",
                 "pi": base / "agents" / "frontier",
             }
-            with patch.object(install, "AGENT_DESTINATIONS", destinations):
+            with patch.object(install, "AGENT_DESTINATIONS", destinations), patch.dict(
+                os.environ, {"HOME": str(base), "FRONTIER_HOME": ""}, clear=False
+            ):
                 self.assertEqual(install.install(["claude"], dry_run=False), 0)
+                self.assertTrue((base / ".frontier").is_dir())
                 self.assertTrue((destinations["claude"] / "SKILL.md").is_file())
                 stale_file = destinations["claude"] / "stale.txt"
                 stale_file.write_text("stale installation content")
