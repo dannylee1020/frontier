@@ -26,12 +26,14 @@ SOURCE_LABELS = {
     "arxiv": "arXiv",
     "semantic_scholar": "Semantic Scholar",
     "huggingface_papers": "Hugging Face Papers",
+    "x_recent": "X",
 }
 
 
 @dataclass
 class _ProviderState:
     source: str
+    role: str = "scholarly"
     state: str = "queued"
     result_count: int = 0
 
@@ -136,9 +138,25 @@ class ProgressDisplay:
                 row.source,
                 row.source.replace("_", " ").title(),
             )
-            noun = self._plural(row.result_count, "match", "matches")
+            noun = (
+                self._plural(row.result_count, "post", "posts")
+                if row.role == "social_momentum"
+                else self._plural(row.result_count, "match", "matches")
+            )
             status = "" if row.state == "completed" else f" · {row.state}"
             rows.append(f"{label:<20} {row.result_count:>3} {noun}{status}")
+
+        if any(row.role == "social_momentum" for row in self._rows.values()):
+            x_posts = counts.get("returned_x", 0)
+            x_trends = counts.get("x_trends", 0)
+            rows.append(
+                f"{'X posts (deduped)':<20} {x_posts:>3} "
+                f"{self._plural(x_posts, 'post', 'posts')}"
+            )
+            rows.append(
+                f"{'X trend clusters':<20} {x_trends:>3} "
+                f"{self._plural(x_trends, 'cluster', 'clusters')}"
+            )
 
         unique = counts.get("deduplicated", 0)
         returned = counts.get("returned", 0)
@@ -155,9 +173,11 @@ class ProgressDisplay:
             f"{'└─' if index == len(rows) - 1 else '├─'} {row}"
             for index, row in enumerate(rows)
         ]
+        has_x = any(row.role == "social_momentum" for row in self._rows.values())
+        label = "search complete" if has_x else "paper search complete"
         header = (
             f"{self._style(Colors.GREEN, '✓')} "
-            f"{self._style(Colors.CYAN, '/frontier')} · paper search complete"
+            f"{self._style(Colors.CYAN, '/frontier')} · {label}"
         )
         return "\n".join((header, *rendered_rows))
 
@@ -192,8 +212,9 @@ class ProgressDisplay:
             if event.source:
                 row = self._rows.setdefault(
                     event.source,
-                    _ProviderState(source=event.source),
+                    _ProviderState(source=event.source, role=event.role or "scholarly"),
                 )
+                row.role = event.role or row.role
                 row.state = event.state or row.state
                 row.result_count = event.result_count
 

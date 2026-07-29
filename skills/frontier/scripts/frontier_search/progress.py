@@ -22,6 +22,8 @@ ProgressState = Literal[
     "partial",
     "failed",
     "rate-limited",
+    "unavailable",
+    "error",
     "cancelled",
 ]
 

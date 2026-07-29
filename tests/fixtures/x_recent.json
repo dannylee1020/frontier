@@ -1,0 +1,80 @@
+{
+  "data": [
+    {
+      "id": "1900000000000000001",
+      "text": "A practical memory system for long-horizon agents https://t.co/example1",
+      "author_id": "501",
+      "created_at": "2026-07-28T10:00:00.000Z",
+      "conversation_id": "1900000000000000001",
+      "entities": {
+        "urls": [
+          {
+            "start": 62,
+            "end": 85,
+            "url": "https://t.co/example1",
+            "expanded_url": "https://arxiv.org/abs/2607.00001",
+            "display_url": "arxiv.org/abs/2607.00001"
+          }
+        ]
+      },
+      "public_metrics": {
+        "retweet_count": 12,
+        "reply_count": 4,
+        "like_count": 90,
+        "quote_count": 3,
+        "bookmark_count": 7,
+        "impression_count": 12000
+      },
+      "referenced_tweets": [],
+      "edit_history_tweet_ids": ["1900000000000000001"]
+    },
+    {
+      "id": "1900000000000000002",
+      "text": "The same memory system is worth testing in production.",
+      "author_id": "502",
+      "created_at": "2026-07-28T11:00:00.000Z",
+      "conversation_id": "1900000000000000001",
+      "public_metrics": {
+        "retweet_count": 2,
+        "reply_count": 1,
+        "like_count": 20,
+        "quote_count": 0,
+        "bookmark_count": 1
+      },
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1900000000000000001"
+        }
+      ],
+      "edit_history_tweet_ids": ["1900000000000000002"]
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "id": "501",
+        "name": "Ada Research",
+        "username": "ada_research",
+        "verified": false,
+        "public_metrics": {
+          "followers_count": 3000
+        }
+      },
+      {
+        "id": "502",
+        "name": "Grace Engineer",
+        "username": "grace_engineer",
+        "verified": false,
+        "public_metrics": {
+          "followers_count": 800
+        }
+      }
+    ]
+  },
+  "meta": {
+    "newest_id": "1900000000000000002",
+    "oldest_id": "1900000000000000001",
+    "result_count": 2
+  }
+}

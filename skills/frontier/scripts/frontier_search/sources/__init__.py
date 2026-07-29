@@ -5,6 +5,7 @@ from .base import SourceAdapter
 from .huggingface_papers import HuggingFacePapersAdapter
 from .openalex import OpenAlexAdapter
 from .semantic_scholar import SemanticScholarAdapter
+from .x_recent import XRecentAdapter
 
 __all__ = [
     "ArxivAdapter",
@@ -12,4 +13,5 @@ __all__ = [
     "OpenAlexAdapter",
     "SemanticScholarAdapter",
     "SourceAdapter",
+    "XRecentAdapter",
 ]

@@ -13,6 +13,7 @@ from typing import Any
 
 SCHOLARLY_SOURCES = frozenset({"openalex", "arxiv", "semantic_scholar"})
 MOMENTUM_SOURCES = frozenset({"huggingface_papers"})
+SOCIAL_SOURCES = frozenset({"x_recent"})
 
 
 def source_role(source: str) -> str:
@@ -46,6 +47,9 @@ class SearchRequest:
     per_source_limit: int = 20
     timeout_seconds: float = 20.0
     max_retries: int = 2
+    x_enabled: bool = False
+    x_days: int = 7
+    x_candidate_limit: int = 100
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -56,6 +60,9 @@ class SearchRequest:
             "per_source_limit": self.per_source_limit,
             "timeout_seconds": self.timeout_seconds,
             "max_retries": self.max_retries,
+            "x_enabled": self.x_enabled,
+            "x_days": self.x_days,
+            "x_candidate_limit": self.x_candidate_limit,
         }
 
 
@@ -169,6 +176,117 @@ class Paper:
 
 
 @dataclass
+class XPost:
+    """A normalized X post kept separate from scholarly paper records."""
+
+    post_id: str
+    text: str
+    author_id: str | None = None
+    username: str | None = None
+    author_name: str | None = None
+    organization: str = "unknown"
+    author_class: str = "unknown"
+    created_at: str | None = None
+    url: str | None = None
+    conversation_id: str | None = None
+    referenced_posts: list[dict[str, str]] = field(default_factory=list)
+    linked_urls: list[str] = field(default_factory=list)
+    public_metrics: dict[str, int] = field(default_factory=dict)
+    matched_queries: list[str] = field(default_factory=list)
+    edit_history_ids: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "post_id": self.post_id,
+            "text": self.text,
+            "author_id": self.author_id,
+            "username": self.username,
+            "author_name": self.author_name,
+            "organization": self.organization,
+            "author_class": self.author_class,
+            "created_at": self.created_at,
+            "url": self.url,
+            "conversation_id": self.conversation_id,
+            "referenced_posts": [dict(item) for item in self.referenced_posts],
+            "linked_urls": list(self.linked_urls),
+            "public_metrics": dict(self.public_metrics),
+            "matched_queries": list(self.matched_queries),
+            "edit_history_ids": list(self.edit_history_ids),
+        }
+
+
+@dataclass
+class XSearchResponse:
+    """One X API query response, including the effective recent window."""
+
+    source: str
+    query: str
+    status: str
+    posts: list[XPost] = field(default_factory=list)
+    effective_since: str | None = None
+    effective_until: str | None = None
+    error: str | None = None
+    truncated: bool = False
+    duration_ms: int = 0
+    api_query: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "source": self.source,
+            "role": "social_momentum",
+            "query": self.query,
+            "api_query": self.api_query,
+            "status": self.status,
+            "effective_since": self.effective_since,
+            "effective_until": self.effective_until,
+            "error": self.error,
+            "truncated": self.truncated,
+            "duration_ms": self.duration_ms,
+            "result_count": len(self.posts),
+        }
+
+
+@dataclass
+class XTrend:
+    """A locally clustered social-attention signal, not a truth claim."""
+
+    title: str
+    matched_queries: list[str] = field(default_factory=list)
+    first_seen: str | None = None
+    last_seen: str | None = None
+    post_count: int = 0
+    unique_author_count: int = 0
+    momentum_score: float = 0.0
+    momentum_label: str = "low"
+    trend_type: str = "single-post"
+    evidence_state: str = "unreviewed"
+    representative_posts: list[str] = field(default_factory=list)
+    linked_artifacts: list[str] = field(default_factory=list)
+    supporting_views: list[str] = field(default_factory=list)
+    counter_views: list[str] = field(default_factory=list)
+    limitations: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "title": self.title,
+            "matched_queries": list(self.matched_queries),
+            "first_seen": self.first_seen,
+            "last_seen": self.last_seen,
+            "post_count": self.post_count,
+            "unique_author_count": self.unique_author_count,
+            "momentum_score": round(self.momentum_score, 8),
+            "momentum_label": self.momentum_label,
+            "trend_type": self.trend_type,
+            "evidence_state": self.evidence_state,
+            "representative_posts": list(self.representative_posts),
+            "linked_artifacts": list(self.linked_artifacts),
+            "supporting_views": list(self.supporting_views),
+            "counter_views": list(self.counter_views),
+            "limitations": list(self.limitations),
+        }
+
+
+@dataclass
 class SearchRun:
     request: SearchRequest
     executed_at: str
@@ -176,6 +294,9 @@ class SearchRun:
     papers: list[Paper]
     counts: dict[str, int]
     momentum_responses: list[SearchResponse] = field(default_factory=list)
+    x_responses: list[XSearchResponse] = field(default_factory=list)
+    x_posts: list[XPost] = field(default_factory=list)
+    x_trends: list[XTrend] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         statuses: dict[str, dict[str, Any]] = {}
@@ -201,6 +322,43 @@ class SearchRun:
             current.setdefault("queries", []).append(response.query)
             current.setdefault("result_counts", []).append(len(response.papers))
 
+        # X is deliberately summarized outside the paper-provider loop. Its
+        # records are social-attention evidence, not paper evidence, and its
+        # statuses need to preserve all-unavailable/all-error states.
+        if self.x_responses:
+            x_statuses: dict[str, list[str]] = {}
+            for response in self.x_responses:
+                current = statuses.setdefault(
+                    response.source,
+                    {"role": "social_momentum", "status": "ok", "errors": []},
+                )
+                x_statuses.setdefault(response.source, []).append(response.status)
+                current.setdefault("response_statuses", []).append(response.status)
+                current.setdefault("queries", []).append(response.query)
+                current.setdefault("result_counts", []).append(len(response.posts))
+                current.setdefault("effective_windows", []).append(
+                    {
+                        "since": response.effective_since,
+                        "until": response.effective_until,
+                    }
+                )
+                current["truncated"] = bool(current.get("truncated")) or response.truncated
+                if response.error:
+                    current["errors"].append(response.error)
+
+            for source, source_statuses in x_statuses.items():
+                current = statuses[source]
+                if all(status == "ok" for status in source_statuses):
+                    current["status"] = "ok"
+                elif all(status == "unavailable" for status in source_statuses):
+                    current["status"] = "unavailable"
+                elif all(status == "rate-limited" for status in source_statuses):
+                    current["status"] = "rate-limited"
+                elif all(status == "error" for status in source_statuses):
+                    current["status"] = "error"
+                else:
+                    current["status"] = "partial"
+
         return {
             "request": self.request.to_dict(),
             "executed_at": self.executed_at,
@@ -210,7 +368,10 @@ class SearchRun:
             "momentum_responses": [
                 response.to_dict() for response in self.momentum_responses
             ],
+            "x_responses": [response.to_dict() for response in self.x_responses],
             "papers": [paper.to_dict() for paper in self.papers],
+            "x_posts": [post.to_dict() for post in self.x_posts],
+            "x_trends": [trend.to_dict() for trend in self.x_trends],
         }
 
 

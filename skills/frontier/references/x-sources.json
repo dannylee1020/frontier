@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "accounts": [],
+  "notes": "Optional identity annotations for X authors. Add an account only after verifying it against an official organization or author page. These annotations never restrict topic search and never establish credibility by themselves."
+}
