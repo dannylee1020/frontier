@@ -11,6 +11,8 @@ ANALYSIS = (ROOT / "skills" / "frontier" / "references" / "analysis-schema.md").
 REPORT = (ROOT / "skills" / "frontier" / "references" / "report-schema.md").read_text()
 SOURCES = (ROOT / "skills" / "frontier" / "references" / "company-sources.md").read_text()
 SAFETY = (ROOT / "skills" / "frontier" / "references" / "safety.md").read_text()
+SOURCE_POLICY = (ROOT / "skills" / "frontier" / "references" / "source-policy.md").read_text()
+X_SOURCES = (ROOT / "skills" / "frontier" / "references" / "x-sources.json").read_text()
 STYLE = (ROOT / "skills" / "frontier" / "references" / "writing-style.md").read_text()
 
 
@@ -101,6 +103,18 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("no more than three items", TEMPLATE)
         for audience in ("**Engineers:**", "**Founders:**", "**Investors:**"):
             self.assertNotIn(audience, TEMPLATE)
+
+    def test_x_social_lane_remains_separate_from_technical_evidence(self) -> None:
+        for text in (SKILL, SOURCE_POLICY, SAFETY):
+            self.assertIn("X", text)
+            self.assertIn("credibility", text.lower())
+        self.assertIn("social-momentum", SKILL)
+        self.assertIn("--x-candidate-limit", SKILL)
+        self.assertIn("~/.frontier/.env", SKILL)
+        self.assertIn("FRONTIER_X_ENABLED=false", SKILL)
+        self.assertIn("never ask the agent to read", SKILL)
+        self.assertIn("Recent Search", SOURCE_POLICY)
+        self.assertIn("accounts", X_SOURCES)
 
     def test_evidence_safeguards_remain_explicit(self) -> None:
         self.assertIn("prior baseline", SKILL.lower())

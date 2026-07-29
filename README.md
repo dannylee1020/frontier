@@ -23,19 +23,15 @@ The default report is kept to one page:
 
 ## Install
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/dannylee1020/frontier/main/scripts/install.sh | sh
-```
-
-You need `curl`, `tar`, and Python 3.12 or newer. Running the installer again replaces the existing Frontier installation.
-
-Use `--agent pi` to install for Pi. Pi, Codex, and OpenCode use the same Agent Skills directory.
+Ask your coding agent to install Frontier using its normal skill-installation workflow. Frontier requires Python 3.12 or newer.
 
 ## How the research works
 
 Frontier starts with two or three genuinely different search angles. It uses the same angles across the paper sources, then searches each lab with one combined query. This widens the search without filling it with minor rewrites of the same phrase.
 
-The default paper sources are OpenAlex and arXiv. Set `SEMANTIC_SCHOLAR_API_KEY` to add Semantic Scholar. Frontier also checks Hugging Face Papers to see which papers are getting attention, but does not treat rank or upvotes as proof.
+The default paper sources are OpenAlex and arXiv. Hugging Face Papers adds paper-attention context without counting as scholarly validation. Semantic Scholar is optional.
+
+When enabled, X searches each topic angle through the official Recent Search API, covering at most seven days. X trends describe attention, not technical validation. See [Search Posts](https://docs.x.com/x-api/posts/search/introduction) and [pricing](https://docs.x.com/x-api/getting-started/pricing).
 
 Frontier then:
 
@@ -48,26 +44,27 @@ Frontier then:
 
 Official lab publications show what an organization reported, released, or did. They do not independently prove a performance claim or establish an industry-wide trend.
 
-## Search utility
 
-The bundled utility searches papers and the Hugging Face Papers feed:
+## Optional providers
 
-```bash
-python3.12 <skill-directory>/scripts/search.py \
-  --query "long-horizon agents" \
-  --query "memory-augmented agents" \
-  --query "context compression" \
-  --output /tmp/frontier-results.json
+### X
+
+Private configuration (`~/.frontier/.env`):
+
+```dotenv
+X_BEARER_TOKEN=<token from the X Developer Console>
+# Optional: FRONTIER_X_ENABLED=false
 ```
 
-Use `--help` to see the available search and output options.
+Once configured, X is included by default. To opt out for a search, use the Frontier-specific `FRONTIER_X_ENABLED=false` setting. X retrieval is pay-per-use and limited to seven days. Its metrics measure attention, not credibility.
 
-Lab-site search stays with the host agent because each site works differently.
+### Semantic Scholar
 
-Progress is written to `stderr`. Interactive terminals show one live status line, followed by a short receipt with matches by source, unique papers in the date window, the shortlist size, and any source failures. Full errors stay in the JSON output.
+```dotenv
+SEMANTIC_SCHOLAR_API_KEY=<key>
+```
 
-Optional environment variables:
+Ask your agent to include Semantic Scholar when you want its additional scholarly metadata.
 
-- `SEMANTIC_SCHOLAR_API_KEY` — add Semantic Scholar
-- `OPENALEX_EMAIL` — use the OpenAlex polite pool
-- `FRONTIER_USER_AGENT` — set a custom request user agent
+Frontier loads `.env` internally; do not paste credentials into chat or ask the agent to display the file. Existing environment variables take precedence. `FRONTIER_HOME` can override the default Frontier home.
+

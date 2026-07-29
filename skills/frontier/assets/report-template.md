@@ -2,6 +2,8 @@
 
 > <date window> · <paper count> papers and <lab-post count> lab posts cited
 
+<!-- Add ` · <X post count> X posts cited` to the header only when X posts are cited. -->
+
 ## The short version
 
 <!-- State what changed, what did not, and the most important qualification in two or three sentences. Start with the finding. -->
@@ -28,6 +30,12 @@
 
 <!-- Include no more than five items. Use only the labels that fit. -->
 
+<!-- Include this section only when X was enabled and a trend cluster is material:
+## Trending on X
+
+- **<Viral post / discussion / emerging discussion>:** <What attracted attention, how many distinct authors or posts were observed, and whether a canonical artifact was found.> **Evidence state:** <unreviewed / artifact-linked / x-only>. **Caveat:** attention is not credibility. [representative posts]
+-->
+
 <!-- Include this section only when the requested audience needs separate implications:
 ## What this changes
 
@@ -43,6 +51,6 @@
 
 ## Sources and limits
 
-**Coverage:** <Enabled paper indexes and momentum feed> · <lab sites checked>
+**Coverage:** <Enabled paper indexes and momentum feed> · <lab sites checked> · <optional X window and fetched-post cap>
 
-**Limits:** <Material source failures, unavailable evidence, and scope limits>
+**Limits:** <Material source failures, unavailable evidence, X truncation, and scope limits>
