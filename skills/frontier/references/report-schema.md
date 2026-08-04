@@ -71,11 +71,11 @@ Brief rules:
 - Lead with conclusions, not search methodology.
 - Follow [writing-style.md](writing-style.md).
 - Keep research evidence, company authority, external validation, adoption, and attention distinguishable.
-- If X is enabled, summarize social attention separately from technical findings; disclose the effective window, fetched-post cap, trend clusters, and truncation.
+- If X is enabled, summarize social attention separately from technical findings; identify `official-api` versus `web-indexed-x`, disclose the API effective window and fetched-post cap when applicable, fallback date bounds and indexing limits when applicable, trend clusters, and truncation.
 - Include only the most useful supporting links.
 - Treat Hugging Face ranking and upvotes as momentum context only.
 - Treat X views, likes, reposts, replies, bookmarks, impressions, and follower counts as attention context only. A viral post is not a trend, and a trend is not a validated technical result.
-- Say when an evidence class or source lane was unavailable; do not imply an unavailable lane had no results.
+- Say when an evidence class or source lane was unavailable; do not imply an unavailable lane had no results. A `site:x.com` fallback is partial web-index coverage, not equivalent to official API retrieval.
 - Do not include query variants, full comparison tables, or uncited candidate counts.
 - Keep the visible brief bounded: three principal changes, five other items, three watch items, and three audience implications when that conditional section is needed.
 

@@ -114,6 +114,11 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("FRONTIER_X_ENABLED=false", SKILL)
         self.assertIn("never ask the agent to read", SKILL)
         self.assertIn("Recent Search", SOURCE_POLICY)
+        self.assertIn("official-api", SKILL)
+        self.assertIn("web-indexed-x", SKILL)
+        self.assertIn("web-indexed-x", SOURCE_POLICY)
+        self.assertIn("site:x.com", SKILL)
+        self.assertIn("zero-result API search does not trigger fallback", SKILL)
         self.assertIn("accounts", X_SOURCES)
 
     def test_evidence_safeguards_remain_explicit(self) -> None:

@@ -37,7 +37,7 @@ Frontier starts with two or three genuinely different search angles. It uses the
 
 The default paper sources are OpenAlex and arXiv. Hugging Face Papers adds paper-attention context without counting as scholarly validation. Semantic Scholar is optional.
 
-When enabled, X searches each topic angle through the official Recent Search API, covering at most seven days. X trends describe attention, not technical validation. See [Search Posts](https://docs.x.com/x-api/posts/search/introduction) and [pricing](https://docs.x.com/x-api/getting-started/pricing).
+When enabled, X searches each topic angle through the official Recent Search API by default, covering at most seven days. If the API is unavailable or not configured, Frontier can fall back to host-native `site:x.com` searches; this fallback is partial web-index coverage, not an exhaustive X search. X trends describe attention, not technical validation. See [Search Posts](https://docs.x.com/x-api/posts/search/introduction) and [pricing](https://docs.x.com/x-api/getting-started/pricing).
 
 Frontier then:
 
@@ -62,7 +62,7 @@ X_BEARER_TOKEN=<token from the X Developer Console>
 # Optional: FRONTIER_X_ENABLED=false
 ```
 
-Once configured, X is included by default. To opt out for a search, use the Frontier-specific `FRONTIER_X_ENABLED=false` setting. X retrieval is pay-per-use and limited to seven days. Its metrics measure attention, not credibility.
+Once configured, the official X API is included by default. To opt out of both API and web-index fallback for a search, use `FRONTIER_X_ENABLED=false`. X API retrieval is pay-per-use and limited to seven days. If the API is unavailable, the host may run one bounded `site:x.com` query per discovery branch. This fallback cannot provide exhaustive counts or reliable engagement metrics. X metrics measure attention, not credibility.
 
 ### Semantic Scholar
 

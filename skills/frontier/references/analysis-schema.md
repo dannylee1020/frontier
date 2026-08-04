@@ -45,13 +45,14 @@ Do not fill missing methodological details from assumptions or from a related pa
 An X trend record describes retrieved attention, not technical truth. It must include:
 
 - `insight_type`: `x_trend`
+- `retrieval_method`: `official-api` or `web-indexed-x`
 - Title and matched discovery branches
 - First and last observed timestamps
 - Post count and unique-author count
 - Momentum label and trend type: `viral-post`, `discussion`, `emerging-discussion`, or `single-post`
 - Evidence state: `unreviewed`, `artifact-linked`, or `x-only`
 - Representative post URLs and linked artifacts
-- Limitations, including cap/truncation and attention-versus-credibility warnings
+- Limitations, including API cap, web-indexing limits, truncation, and attention-versus-credibility warnings
 
 Views, likes, reposts, replies, bookmarks, impressions, recency, and follower counts are attention metadata. They cannot establish credibility, consensus, adoption, or independent corroboration. A canonical linked artifact must be inspected separately.
 
